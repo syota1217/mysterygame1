@@ -270,6 +270,36 @@
   .opt input{ margin-top:3px; accent-color:var(--crimson); }
   .opt-label{ font-size:14px; color:var(--ink); }
 
+  /* ===== Confrontation ===== */
+  .confront-wrap{ max-width:720px; margin:0 auto; }
+  .confront-setup{ font-size:14.5px; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:2px; padding:20px 22px; margin-bottom:22px; }
+  .confront-entry{ margin-bottom:16px; }
+  .confront-bubble{ max-width:90%; padding:13px 16px; border-radius:2px; font-size:14px; line-height:1.7; margin-bottom:8px; position:relative; }
+  .confront-bubble .cb-name{ display:block; font-size:10.5px; letter-spacing:.1em; color:var(--ink-faint); margin-bottom:4px; }
+  .confront-bubble.culprit{ background:rgba(143,42,53,0.12); border:1px solid var(--crimson); color:var(--paper); margin-right:auto; }
+  .confront-bubble.culprit .cb-name{ color:var(--crimson-bright); }
+  .confront-bubble.detective{ background:rgba(185,146,79,0.1); border:1px solid var(--gold-soft); color:var(--paper); margin-left:auto; text-align:right; }
+  .confront-bubble.detective .cb-name{ color:var(--gold); }
+  .confront-round{ margin-top:6px; }
+  .confront-round-num{ text-align:center; font-size:11px; letter-spacing:.15em; color:var(--gold); margin-bottom:14px; }
+  .confront-prompt{ text-align:center; font-size:13px; color:var(--ink-dim); margin:18px 0 12px; }
+  .eopt-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media(max-width:600px){ .eopt-grid{ grid-template-columns:1fr; } }
+  .eopt{
+    background:var(--panel); border:1px solid var(--line); border-radius:2px;
+    padding:16px 16px; cursor:pointer; transition:all .15s ease; text-align:center;
+  }
+  .eopt:hover{ border-color:var(--gold); background:var(--panel-light); transform:translateY(-1px); }
+  .eopt-label{ font-size:13.5px; color:var(--ink); }
+  .confront-hit{ text-align:center; background:var(--panel); border:1px solid var(--gold-soft); border-radius:2px; padding:22px; margin-top:10px; }
+  .confront-hit p{ color:var(--paper); font-size:14.5px; margin:0 0 16px; }
+  .confront-gameover{ text-align:center; background:rgba(143,42,53,0.1); border:1px solid var(--crimson); border-radius:2px; padding:30px 26px; margin-top:14px; }
+  .go-title{ font-size:24px; color:var(--crimson-bright); letter-spacing:.1em; margin-bottom:14px; }
+  .confront-gameover p{ color:var(--ink); font-size:14.5px; margin-bottom:20px; }
+  .confront-confession{ background:var(--panel); border:1px solid var(--gold); border-radius:2px; padding:28px 26px; margin-top:14px; }
+  .cf-title{ font-size:22px; color:var(--gold); letter-spacing:.1em; margin-bottom:16px; text-align:center; }
+  .confront-confession p{ color:var(--ink); font-size:14.5px; margin:0 0 14px; }
+
   /* ===== Result ===== */
   .result-banner{ text-align:center; padding:34px 20px 24px; margin-bottom:8px; }
   .result-banner .verdict{ font-family:'Shippori Mincho',serif; font-size:30px; font-weight:800; letter-spacing:.08em; }
@@ -317,7 +347,8 @@
       <div class="p" data-phase="0">序章</div>
       <div class="p" data-phase="1">捜査</div>
       <div class="p" data-phase="2">推理</div>
-      <div class="p" data-phase="3">解決</div>
+      <div class="p" data-phase="3">対決</div>
+      <div class="p" data-phase="4">解決</div>
     </div>
   </header>
 
@@ -359,8 +390,13 @@
     <div class="deduction-wrap" id="deductionContent"></div>
   </section>
 
-  <!-- ===================== SCREEN 3: RESULT / SOLUTION ===================== -->
+  <!-- ===================== SCREEN 3: CONFRONTATION ===================== -->
   <section class="screen" id="screen-3">
+    <div class="confront-wrap" id="confrontContent"></div>
+  </section>
+
+  <!-- ===================== SCREEN 4: RESULT / SOLUTION ===================== -->
+  <section class="screen" id="screen-4">
     <div id="resultBanner" class="result-banner"></div>
     <div id="resultBody"></div>
   </section>
@@ -857,6 +893,59 @@ const episode2 = {
   },
   correct: { q1:["fuyuko"], q2:"a", q3:"a" },
 
+  confrontation: {
+    culpritName: "冬子",
+    intro: "捜査の結果を携え、天才探偵は食堂車に冬子を呼び出す。「冬子さん。支倉玄一さんを殺害したのは、あなたですね。」冬子はわずかに眉を上げただけで、表情を崩さなかった。",
+    rounds: [
+      {
+        rebuttal: "「……何をおっしゃりたいのか分かりません。主人の部屋には行っていない、と最初に申し上げたはずです。」",
+        hit: "冬子の視線が一瞬揺れる。「……少しだけ、様子を見に行っただけです。夫婦なんですから、それくらい当然でしょう。何もおかしなことはありません。」",
+        options: [
+          { id:"c1", label:"亮さんの目撃証言と、後になって『少し様子を見に行った』とご自身が証言を修正された事実", correct:true },
+          { id:"c2", label:"金庫の取っ手に残っていた遠野さんの指紋", correct:false },
+          { id:"c3", label:"神尾さんが23時頃、個室を訪ねたという証言", correct:false },
+          { id:"c4", label:"黒沢さんが夕方に聞いたという電話の内容", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「少しだけ、様子を見に行っただけです。夫婦なんですから、それくらい当然でしょう。何もおかしなことはありません。」",
+        hit: "冬子の表情が、わずかに硬くなる。「……工具くらい、身だしなみのために誰でも持っています。列車のことを知っているのだって、何年も出張に付き添っていれば当然でしょう。言いがかりです。」",
+        options: [
+          { id:"c5", label:"化粧ポーチにあったピック状の工具と、『この列車の癖も分かっている』というご自身の発言", correct:true },
+          { id:"c6", label:"保護布に刺繍されていた『T.T.』のイニシャル", correct:false },
+          { id:"c7", label:"亮さんが石の鑑定に違和感を覚えていたという証言", correct:false },
+          { id:"c8", label:"黒沢さんの取材ノートにあった走り書き", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「工具くらい、身だしなみのために誰でも持っています。列車のことを知っているのだって、何年も出張に付き添っていれば当然でしょう。言いがかりです。」",
+        hit: "冬子は小さく息を吐く。「保険の手続きを早めに進めるのは、万が一に備える普通のことです。夫を亡くした妻が、保険を気にして何が悪いんですか。」",
+        options: [
+          { id:"c9", label:"生命保険金の請求書類と、保険代理店とのここ一週間の頻繁な通話履歴", correct:true },
+          { id:"c10", label:"遠野さんが石をすり替えていたという告白", correct:false },
+          { id:"c11", label:"神尾さんと支倉さんの過去の取引トラブル", correct:false },
+          { id:"c12", label:"亮さんの鞄にあった高額の出金明細", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「保険の手続きを早めに進めるのは、万が一に備える普通のことです。夫を亡くした妻が、保険を気にして何が悪いんですか。」",
+        hit: "冬子の顔から、初めて表情が消える。もう、取り繕う余裕もないようだった。",
+        options: [
+          { id:"c13", label:"クローゼットの手袋に付着していた、心臓薬特有の白い粉末", correct:true },
+          { id:"c14", label:"黒沢さんの取材ノートに書かれていた、幻に終わったインタビューの予定", correct:false },
+          { id:"c15", label:"遠野さんが今も持っていた、本物の『暁の涙』", correct:false },
+        ],
+      },
+    ],
+    finalConfession: [
+      "冬子はしばらく無言のまま、テーブルの一点を見つめていたが、やがて――抵抗する気力が失せたように、小さく笑った。「……随分、丁寧に調べ上げましたね。」",
+      "「あの人は、私を『飾り』としてしか見ていませんでした。結婚して10年、ずっとそうでした。若い頃の恋人のことは今でも忘れられないくせに、私にはお金と体面だけを求めて。離婚を切り出したことも、一度や二度ではありません。でも、あの人は絶対に応じなかった。『お前には何もやらない』が口癖でした。……このままでは、私には何も残らない。それなら、いっそ――。」",
+      "密室工作について尋ねると、冬子は静かに続けた。「主人の出張には、もう何年も付き添っています。この列車の鍵の癖は、車掌長から昔、雑談で聞いたことがあったんです。」",
+      "遠野の存在に気づいていたかと尋ねると、冬子は目を伏せた。「……いいえ、正直、あの子が石をすり替えていたなんて、今夜初めて知りました。皮肉なものですね。」",
+    ],
+    gameOverText: "冬子は静かに微笑むと、悠然と席を立った。「証拠不十分ですね、探偵さん。」決定的な一手を欠いたまま、彼女を追い詰める機会は失われてしまった——。",
+  },
+
   solutionSections: [
     { title:"第一部　現場の矛盾",
       html:"支倉の遺体には苦悶の表情があり、ブランデーグラスと、ほぼ空になった心臓病用の常備薬の瓶が残されていた。前回の事件とは対照的に、今回は<strong>薬物の過剰摂取による中毒症状</strong>がそのまま表れた形での死だった。" },
@@ -902,12 +991,300 @@ const episode2 = {
   ]
 };
 
-const episode3Placeholder = {
-  id:"placeholder-3", number:3, title:"次なる事件簿", subtitle:"近日公開",
-  teaser:"新しい事件は、まだ捜査ファイルが届いていない。", status:"locked"
+const episode3 = {
+  id: "genei-za",
+  number: 3,
+  title: "千秋楽の毒 —— 劇場「幻影座」殺人事件",
+  subtitle: "小劇場「幻影座」",
+  teaser: "千秋楽のカーテンコール、看板俳優が舞台上で崩れ落ちた。豪雪に閉ざされた劇場で、幕は誰のために引かれたのか。",
+  status: "available",
+
+  prologueLede: "老朽化した趣のある小劇場「幻影座」。今夜はミステリー舞台劇『赤い戯曲』の千秋楽。カーテンコールの拍手が鳴りやまぬ中、座長・天城玲司が舞台上で崩れ落ちた。楽屋に運ばれた直後、彼は帰らぬ人となる。医師の見立ては、毒物による急性心停止。",
+  prologueParagraphs: [
+    "折悪しく、外は季節外れの豪雪。劇場周辺の道路は完全に封鎖され、今夜だけは誰も劇場を出ることも、外部から入ることもできない。",
+    "そして、天城が最後の舞台で握りしめていたはずの小道具の懐剣が、いつの間にか本物の刃に差し替えられていたことも判明する。あなたは名探偵として、この閉ざされた劇場の謎を解かねばならない。"
+  ],
+  cast: [
+    { id:"shiratori", role:"若手看板女優", name:"白鳥 真央" },
+    { id:"yuto", role:"座長の息子・舞台美術", name:"天城 悠人" },
+    { id:"kuki", role:"演出家", name:"九鬼 誠" },
+    { id:"tooyama", role:"劇場支配人", name:"遠山" },
+    { id:"yuzuki", role:"脚本家", name:"柚木 冴子" },
+    { id:"kaede", role:"メイク担当", name:"楓" },
+  ],
+
+  locations: [
+    { id:"scene",     label:"楽屋・遺体" },
+    { id:"cup",       label:"ハーブティー" },
+    { id:"warehouse", label:"小道具倉庫" },
+    { id:"kuki",      label:"演出家・九鬼" },
+    { id:"relations", label:"人間関係" },
+    { id:"kaede",     label:"メイク・楓" },
+    { id:"tooyama",   label:"支配人・遠山" },
+    { id:"search",    label:"身辺調査" },
+    { id:"dagger",    label:"懐剣の謎" },
+    { id:"yuzuki",    label:"脚本家・柚木" },
+    { id:"yuto",      label:"息子・悠人" },
+  ],
+
+  investigationBudget: 14,
+  unlockThreshold: 10,
+
+  clues: [
+    { id:"g1", loc:"scene", title:"楽屋の発見時の状況", sub:"カーテンコール直後",
+      body:[
+        "カーテンコール直後、舞台袖で崩れた天城を、悠人と楓が椅子に乗せて楽屋まで運んだ。鏡台の上は整然としており、争った形跡はない。",
+        "鏡台には飲みかけのハーブティーのカップがひとつ。衣装のポケットは空で、後になって悠人が『いつも肌身離さず持っていたお守り（亡き妻の形見）がない』ことに気づいた。"
+      ],
+      evidence:["楽屋に争った形跡はなかった","天城のポケットから、いつも持ち歩いていたお守りが消えていた"]
+    },
+    { id:"g2", loc:"scene", title:"医師の所見", sub:"往診の医師による見立て",
+      body:[
+        "唇にわずかな青みがあるが、外傷はない。心停止に至るまでの時間は比較的短く、即効性の毒物の可能性が高いとのこと。"
+      ],
+      evidence:["天城の唇にわずかな青みがあった（外傷なし）","医師：即効性の毒物による心停止の可能性が高い"]
+    },
+    { id:"g3", loc:"scene", title:"消えたお守り", sub:"悠人への確認",
+      body:[
+        "悠人に尋ねると、「父がいつも肌身離さず持っていたものです。なぜ無くなったのか……」と困惑した様子だった。この時点では行方は分からない。"
+      ],
+      evidence:["消えたお守りの行方は、この時点では分かっていない"]
+    },
+    { id:"g4", loc:"cup", title:"カップの検分", sub:"沈殿物・指紋・ポット",
+      body:[
+        "カップの底にわずかな白い沈殿物。往診の医師は「ハーブの成分だけとは思えない、苦味の強い粉末状の何かが混じっている」と指摘した。",
+        "カップの取っ手には、天城本人のものとは違う指紋がうっすらと残っている。給湯用の保温ポット自体からは、異常な成分は検出されなかった。"
+      ],
+      evidence:["カップの底に白い沈殿物が残っていた","カップの取っ手に、天城以外のものと見られる指紋があった","保温ポット自体からは異常な成分は検出されなかった"]
+    },
+    { id:"g5", loc:"cup", title:"楓への聞き込み：準備の手順", sub:"開演30分前のルーティン",
+      body:[
+        "「いつも開演30分前に、控室でお湯を沸かして淹れています。今日は少しバタバタしていて、私が席を外している間に、誰かが代わりに運んでくれたんです。」",
+        "「誰が運んだかまでは、はっきりとは……。」"
+      ],
+      evidence:["楓：今日はカップを『誰かが代わりに運んでくれた』と証言"]
+    },
+    { id:"g6", loc:"cup", title:"指紋照合", sub:"支配人の協力で簡易照合",
+      body:[
+        "以前の小道具盗難騒ぎの際に記録されていた団員の指紋と照合した結果、カップの取っ手の指紋は、演出家・九鬼誠のものと一致する可能性が高いことが分かった。"
+      ],
+      evidence:["カップの取っ手の指紋は、演出家・九鬼のものと一致する可能性が高い"]
+    },
+    { id:"g7", loc:"warehouse", title:"白い粉末の鑑定", sub:"元薬剤師の観客の協力",
+      body:[
+        "「これは、トリカブト由来のアルカロイド系毒物だと思います。苦味が強く、致死量に達すると心臓の不整脈から急激な心停止を引き起こします。」",
+        "「即効性もあります。開演前に摂取して、本番中に倒れる――というタイミングも十分あり得ます。」"
+      ],
+      evidence:["カップの白い粉末は、トリカブト由来のアルカロイド系毒物と推定される"]
+    },
+    { id:"g8", loc:"warehouse", title:"トリカブトの出所", sub:"小道具倉庫にて",
+      body:[
+        "5年前の演目『毒草の館』で使用した、本物のトリカブトの乾燥標本が倉庫に保管されていた。小瓶の中身は明らかに減っている。",
+        "倉庫の管理は小道具担当の悠人だが、施錠されておらず、劇団関係者なら誰でも出入りできる状態だった。"
+      ],
+      evidence:["小道具倉庫のトリカブト標本は中身が減っていた","倉庫は施錠されておらず、劇団関係者なら誰でも出入りできた"]
+    },
+    { id:"g9", loc:"kuki", title:"九鬼への聞き込み", sub:"天城との関係について",
+      body:[
+        "「天城とはもう20年近い付き合いです。……強いて言うなら、最近は演出方針を巡って、少し意見がぶつかることもありました。ただ、それだけです。」（やや早口気味だった）",
+        "『毒草の館』の小道具について尋ねると：「まさか、まだあの小道具が残っていたとは……正直、忘れていました。」"
+      ],
+      evidence:["九鬼：天城との関係について『それだけです』と早口気味に述べた","九鬼：『毒草の館』の小道具については『忘れていた』と証言"]
+    },
+    { id:"g10", loc:"relations", title:"白鳥・悠人の証言", sub:"九鬼と天城の様子",
+      body:[
+        "白鳥：「最近、リハーサルでちょっとピリピリしてる場面がありました。演出の指示に天城さんが何度も口を挟んで、九鬼さんが苦い顔をしていたのを覚えています。」",
+        "悠人：「数日前、二人が楽屋で言い争っているような声が聞こえました。九鬼さんが『もう我慢の限界だ』とか、そんなことを言っていた気がします。」"
+      ],
+      evidence:["白鳥：リハーサルで九鬼が天城の指示に苦い顔をしていたと証言","悠人：数日前、九鬼と天城が言い争う声を聞いたと証言"]
+    },
+    { id:"g11", loc:"relations", title:"遠山・柚木の証言", sub:"九鬼の独立志向",
+      body:[
+        "遠山：「九鬼くんは以前から、自分の劇団を持ちたいという夢を語っていたことがあります。ただ、天城さんの存在が大きすぎて、なかなか踏み出せずにいたようで。」",
+        "柚木：「彼が最近、独立を考えているという噂は耳にしたことがあります。」楓：「新作の主演を天城さんが『白鳥に譲る』と決めたことに、九鬼さんはあまり納得していないようでした。」"
+      ],
+      evidence:["遠山：九鬼はかねてから自分の劇団を持ちたいと語っていたと証言","柚木：九鬼が独立を考えているという噂を聞いていたと証言","楓：主演を白鳥に譲る決定に九鬼が納得していない様子だったと証言"]
+    },
+    { id:"g12", loc:"kaede", title:"楓の告白：交際関係と運搬の経緯", sub:"当夜の出来事",
+      body:[
+        "「お付き合いを始めたのは、去年の秋頃からです。天城さんは奥様を亡くされてから、ずっと寂しそうにしていて……。」",
+        "当夜の行動について：「あの時、九鬼さんが『俺が運んでおくよ、お前は忙しそうだから』と声をかけてくれたんです。だから、お願いしました。」"
+      ],
+      evidence:["楓：天城と交際していたと告白","楓：当夜、九鬼が自ら『俺が運んでおくよ』と申し出てカップを運んだと証言"]
+    },
+    { id:"g13", loc:"tooyama", title:"遠山の目撃証言", sub:"開演20分前の九鬼",
+      body:[
+        "「そういえば……天城さんが倒れる少し前、楽屋の方から九鬼くんが慌てた様子で出てくるのを見かけました。時間にして、開演20分前くらいだったと思います。」",
+        "一方、九鬼本人は「ずっと舞台袖で最終確認をしていた」と証言していた。"
+      ],
+      evidence:["遠山：開演20分前、九鬼が楽屋から慌てた様子で出てくるのを見たと証言","九鬼自身は『ずっと舞台袖にいた』と証言していた（食い違い）"]
+    },
+    { id:"g14", loc:"search", title:"九鬼の私物（密かに確認）：企画書とハンカチ", sub:"鞄と上着のポケット",
+      body:[
+        "鞄の中に、新劇団設立のための企画書。表紙に「主宰：九鬼誠」、隅に「天城の後ろ盾なしで、どこまでやれるか」という走り書きがあった。",
+        "上着のポケットのハンカチに、ごくわずかに苦味のある粉末の痕跡が残っていた。"
+      ],
+      evidence:["九鬼の鞄に新劇団設立の企画書があった（『天城の後ろ盾なしで、どこまでやれるか』の走り書き）","九鬼のハンカチに苦味のある粉末の痕跡があった"]
+    },
+    { id:"g15", loc:"search", title:"九鬼の私物：公演プログラムとスケジュールメモ", sub:"楽屋の引き出し",
+      body:[
+        "上着のポケットに、5年前の公演『毒草の館』のプログラムが折り畳んで入っていた。ページの端に、最近めくったような新しい折り目。",
+        "楽屋の引き出しのタイムスケジュールメモには、天城の名前の横にだけ小さく「◯」の印がついていた。"
+      ],
+      evidence:["九鬼の所持品に『毒草の館』のプログラムがあり、最近めくった跡があった","九鬼のスケジュールメモには、天城の名前にだけ印がついていた"]
+    },
+    { id:"g16", loc:"dagger", title:"懐剣のすり替え発覚", sub:"柚木への聞き込み",
+      body:[
+        "天城が握っていた小道具の懐剣が、本物の刃に差し替わっていたことが判明した。幸い、天城はこの刃で傷つくことはなかった。",
+        "柚木：「もともと懐剣の小道具は登場しません。天城さんが千秋楽の3日前になって、急に『ここで懐剣を持たせろ』と言い出したんです。『これは俺の最後の見せ場になるかもしれない』と、意味深に呟いていました。」"
+      ],
+      evidence:["小道具の懐剣が、本物の刃に差し替わっていた","柚木：懐剣の演出は天城が千秋楽の3日前に急遽指示したものだったと証言"]
+    },
+    { id:"g17", loc:"dagger", title:"懐剣の発注元とスケジュール帳", sub:"業者への確認",
+      body:[
+        "小道具業者：「刃を潰していない、本物に近い懐剣を一振り、天城様ご本人から直接、内密にご依頼いただいていました。」",
+        "天城のスケジュール帳の千秋楽当日のページには、「本番中、あの懐剣を客席に見せる。長年の嘘に、そろそろ幕を引く時だ」と書き込まれていた。"
+      ],
+      evidence:["小道具業者：本物に近い懐剣は天城本人からの内密の依頼だったと証言","天城のスケジュール帳に『長年の嘘に、そろそろ幕を引く』という書き込みがあった"]
+    },
+    { id:"g18", loc:"tooyama", title:"遠山の告白：経営権と『長年の嘘』", sub:"追及の末に",
+      body:[
+        "遠山：「天城さんから、『幻影座の経営権の一部を、正式に譲り受けたい』という相談を受けていました。」",
+        "さらに追及すると、十数年前に自身が犯した経理上の不正を、天城が長年ずっと肩代わりし庇い続けてきたことを告白した。「長年の嘘」とは、この秘密のことだった。"
+      ],
+      evidence:["遠山：天城から劇場の経営権について相談を受けていたと証言","遠山：かつての経理不正を天城が長年庇っていたことを告白"]
+    },
+    { id:"g19", loc:"yuzuki", title:"柚木との脚本を巡る対立", sub:"聞き込み",
+      body:[
+        "「正直に言うと、今回の脚本を巡って、天城さんと何度も衝突しました。彼は物語の結末すら、土壇場で変えようとしていたんです。脚本家としての矜持を、正直、踏みにじられた気持ちでした。」"
+      ],
+      evidence:["柚木：脚本の方向性を巡って天城と何度も衝突していたと証言"]
+    },
+    { id:"g20", loc:"yuto", title:"悠人の証言：複雑な感情と指輪", sub:"父との関係",
+      body:[
+        "「父とは、正直複雑でした。舞台美術の仕事も、最初は認めてもらえなくて。」父の交際については「薄々気づいていました。母を亡くしてから塞ぎ込んでいた父が、少しでも笑顔を取り戻せるなら、と。」",
+        "「これは言うべきか迷ったんですが……数日前、父の楽屋の引き出しに、指輪の入った小さな箱があるのを見てしまいました。」"
+      ],
+      evidence:["悠人：父との関係は複雑だったが、交際については受け入れていたと証言","悠人：天城の楽屋の引き出しに指輪の入った小箱を見たと証言"]
+    },
+  ],
+
+  questions: {
+    q2: [
+      { id:"a", label:"トリカブトをハーブティーに混入し、自ら志願してカップを運んだ" },
+      { id:"b", label:"すり替えた懐剣の刃で天城を刺した" },
+      { id:"c", label:"舞台照明を細工し、感電させた" },
+      { id:"d", label:"天城が誤ってトリカブトを含む薬を服用した事故だった" },
+    ],
+    q3: [
+      { id:"a", label:"20年に及ぶ鬱屈と、独立への渇望" },
+      { id:"b", label:"劇場の経営権を奪われることへの恐怖" },
+      { id:"c", label:"脚本の方向性を巡る対立への恨み" },
+      { id:"d", label:"父子関係のもつれ" },
+    ],
+  },
+  correct: { q1:["kuki"], q2:"a", q3:"a" },
+
+  confrontation: {
+    culpritName: "九鬼",
+    intro: "捜査の結果を携え、天才探偵は舞台の中央で九鬼誠と向き合う。「九鬼さん。天城玲司さんを毒殺したのは、あなたですね。」九鬼は一瞬固まるが、すぐに表情を整え、鼻で笑った。",
+    rounds: [
+      {
+        rebuttal: "「……は? 何を言い出すかと思えば。証拠もないのに、そんな決めつけを許されると思っているんですか。」",
+        hit: "九鬼の頬が、わずかに引きつる。「……指紋がついていたからって何です? 楓が忙しそうだったから、俺が運んだ。それだけの話でしょう。親切心を犯罪扱いされちゃたまりません。」",
+        options: [
+          { id:"c1", label:"カップの取っ手に残っていた、あなたの指紋", correct:true },
+          { id:"c2", label:"消えたお守りの行方", correct:false },
+          { id:"c3", label:"遠山さんが受けていた経営権の相談", correct:false },
+          { id:"c4", label:"柚木さんと天城さんの脚本を巡る対立", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「指紋がついていたからって何です? 楓が忙しそうだったから、俺が運んだ。それだけの話でしょう。親切心を犯罪扱いされちゃたまりません。」",
+        hit: "九鬼の視線が、わずかに泳ぐ。「……プログラムを持っていたのは事実ですが、それがどうしたんです。昔の演目を懐かしんで読み返すのは、悪いことですか? トリカブトの件は、正直、記憶になかったんです。」",
+        options: [
+          { id:"c5", label:"倉庫のトリカブト標本と、最近めくられた『毒草の館』のプログラム", correct:true },
+          { id:"c6", label:"白鳥さんに主演を譲るという話", correct:false },
+          { id:"c7", label:"懐剣が本物の刃にすり替わっていた件", correct:false },
+          { id:"c8", label:"楓さんと天城さんの交際関係", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「プログラムを持っていたのは事実ですが、それがどうしたんです。昔の演目を懐かしんで読み返すのは、悪いことですか? トリカブトの件は、正直、記憶になかったんです。」",
+        hit: "一瞬、九鬼の視線が泳ぐ。しかし、すぐに強気な口調で切り返す。「遠山さんの見間違いでしょう。あの時間、劇場中バタバタしていたんです。誰かと見間違えたって、おかしくない。」",
+        options: [
+          { id:"c9", label:"開演20分前、あなたが楽屋から慌てて出てくるのを見たという遠山さんの目撃証言", correct:true },
+          { id:"c10", label:"悠人さんが懐剣を最後にセットしたという証言", correct:false },
+          { id:"c11", label:"遠山さん自身の、過去の経理不正", correct:false },
+          { id:"c12", label:"柚木さんの『矜持を踏みにじられた』という発言", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「遠山さんの見間違いでしょう。あの時間、劇場中バタバタしていたんです。誰かと見間違えたって、おかしくない。……そもそも、演出家が本番前に楽屋周りをうろつくのは、当たり前のことです。」",
+        hit: "九鬼の顔から、初めて明確に血の気が引く。もう、言い逃れの言葉は出てこないようだった。",
+        options: [
+          { id:"c13", label:"あなたの鞄にあった、新劇団設立の企画書 ――『天城の後ろ盾なしで、どこまでやれるか』の走り書き", correct:true },
+          { id:"c14", label:"天城さんのスケジュール帳にあった『長年の嘘』のメモ", correct:false },
+          { id:"c15", label:"消えたお守りが、実は指輪に交換するためのものだったという事実", correct:false },
+        ],
+      },
+    ],
+    finalConfession: [
+      "九鬼は、しばらく荒い息のまま天才探偵を睨みつけていたが、やがて張り詰めていた糸が切れたように、乾いた笑い声を漏らす。「……はは。……そうですよ、認めます。もう、これ以上は無駄だ。」",
+      "「20年です。20年、天城の陰で演出をやってきた。彼の才能は本物だった。だからこそ、誰も彼に逆らえなかった。俺の演出プランも、脚本の方向性も、最後は全部『天城の色』に染められる。……俺は、いつまで経っても『天城の劇団の、演出家』でしかなかった。」",
+      "「新作の主演を白鳥に譲るという話を聞いたとき、思ったんです。『ああ、また天城が全部決めるのか』と。もう、限界だった。『毒草の館』のトリカブトのことは、実はずっと覚えていました。忘れていたなんて、嘘です。楓が忙しそうにしていた時、これが最後のチャンスかもしれないと思って、咄嗟に『俺が運ぶ』と申し出た。」",
+      "懐剣のことを尋ねると、九鬼は初めて、心底戸惑った表情を見せた。「懐剣のことは、本当に俺じゃない。……天城が、自分で仕組んでいたことだったなんて。奇妙なものですね。俺が天城を消そうとした、まさにその夜に、天城自身も何かに『幕を引こう』としていたなんて。」",
+    ],
+    gameOverText: "九鬼は薄く笑うと、静かに肩をすくめる。「それでは、証拠不十分ですね。」彼はそのまま悠然と楽屋へ戻っていった。決定的な一手を欠いたまま、この場での追及は失敗に終わった——。",
+  },
+
+  solutionSections: [
+    { title:"第一部　現場の矛盾",
+      html:"天城の遺体には唇にわずかな青みがあり、心停止までの時間は比較的短かった。鏡台のハーブティーのカップには白い沈殿物が残り、成分は<strong>トリカブト由来のアルカロイド系毒物</strong>と判明した。天城には毎公演前にこのお茶を飲む習慣があり、準備から手渡しまでの間に混入する機会を持つ人物が絞り込まれることになった。" },
+    { title:"第二部　機会",
+      html:"カップの取っ手からは演出家・九鬼の指紋が検出され、楓の証言により、当夜九鬼が自ら『俺が運んでおくよ』と志願してカップを運んだ経緯が確定した。トリカブトの出所は、過去の演目『毒草の館』で使われた小道具倉庫の標本で、施錠されていなかったものの、九鬼はそのプログラムを所持し最近読み返した跡があった。" },
+    { title:"第三部　動機",
+      html:"九鬼は20年近くにわたり天城の陰で演出を務め、独立への野心を燻らせていた。新劇団設立の企画書と『天城の後ろ盾なしで、どこまでやれるか』という走り書きが、その動機を裏付けた。新作の主演を白鳥に譲るという天城の決定が、積年の鬱屈に火をつけた。" },
+    { title:"第四部　もう一つの糸",
+      html:"すり替えられた懐剣は、犯人の仕業ではなく<strong>天城本人</strong>が業者に内密で発注したものだった。彼は千秋楽の舞台で、支配人・遠山の過去の経理不正を長年庇い続けてきた『長年の嘘』に自ら幕を引こうとしていた。消えたお守りも、天城が指輪に交換するために自身で保管していただけで、事件性はなかった。二つの『幕引き』が、同じ夜に、別々の思惑で動いていたのだった。" },
+  ],
+  evidenceTable: [
+    ["1","カップの白い沈殿物＝トリカブト由来の毒物","混入方法の特定"],
+    ["2","カップの取っ手の指紋＝九鬼のもの","九鬼が運搬に関与した物証"],
+    ["3","楓の証言（九鬼が自ら運搬を志願）","機会の裏付け"],
+    ["4","倉庫のトリカブト標本＋『毒草の館』プログラム","毒物の入手経路と、忘れていたという証言の虚偽"],
+    ["5","遠山の目撃証言とアリバイの食い違い","犯行時刻における九鬼の不在の裏付け"],
+    ["6","新劇団設立の企画書","独立への野心という動機の物証"],
+    ["7","懐剣のすり替え＝天城本人の発注（業者証言）","事件とは別の、天城自身の意図と判明"],
+  ],
+  epilogue: {
+    intro: "豪雪が止み、道路が再開通した早朝、駆けつけた警察に九鬼は静かに連行されていった。舞台には、まだ千秋楽の余韻が漂っていた。",
+    characters: [
+      { who:"座長の息子・悠人", text:"父の遺した舞台美術の仕事を、正式に引き継ぐことを決めた。「父が最後に見せようとした景色を、僕なりに引き継ぎたい」と語った。" },
+      { who:"支配人・遠山", text:"劇団員たちに、自らの過去を包み隠さず打ち明けた。「天城さんが命をかけて守ってくれたこの劇場を、今度は自分の手で立て直したい」と頭を下げた。" },
+      { who:"メイク担当・楓", text:"指輪の入った小箱を、そっと胸に抱いた。「渡してもらえなかった言葉の続きは、一生分からないままです」と静かに涙を流した。" },
+      { who:"脚本家・柚木", text:"『赤い戯曲』の続編を書くことを決意した。「今度こそ、誰にも譲らない結末を書きます」と力強く語った。" },
+    ],
+    outro: "雪の晴れ間に、幻影座の看板がひっそりと光る。ふたつの『幕引き』を見届けた小劇場は、次の物語をまた静かに待ち始める。"
+  },
+  altRoute: {
+    title:"別バージョンの真相 —— もし真犯人が悠人だったら",
+    paragraphs: [
+      "同じ証拠を読み直すと——懐剣を最後にセットしたのは悠人であり、倉庫の管理者でもある。トリカブトの持ち出しにおいて、最も自然にアクセスできたのは彼だったとも言える。",
+      "<strong>見落とされていた可能性：</strong>『父の再婚を受け入れていた』という悠人の証言は、本心を隠すための演技だったとしたら。舞台美術の仕事を『二流』と評され続けた鬱屈は、九鬼のそれと同じくらい根深いものだったかもしれない。",
+      "<strong>犯行の実像：</strong>悠人はカップの運搬こそしていないが、倉庫からトリカブトを持ち出し、あらかじめ何らかの形で天城の手元に渡るよう仕組んだ——九鬼が『俺が運ぶ』と申し出たのは、単なる偶然に過ぎなかった、という筋書きも成立してしまう。",
+    ],
+    note:"※ 九鬼の指紋・アリバイの矛盾・企画書という物証の積み重ねに対し、この説は状況証拠だけで物的証拠を欠きます。今回の正解ルートは『演出家・九鬼の単独犯行』でした。"
+  },
+  redHerrings: [
+    "消えたお守り：天城が指輪に交換するため、自身で保管していただけだった。",
+    "懐剣のすり替え：天城本人が業者に内密で発注したもので、事件性はなかった。",
+    "遠山の経営権相談と過去の不正：殺人事件とは別に隠されていた、劇場内のもう一つの秘密だった。",
+    "柚木との脚本を巡る対立：感情的な軋轢はあったが、事件そのものとは無関係だった。",
+  ]
 };
 
-const episodes = [ episode1, episode2, episode3Placeholder ];
+const episodes = [ episode1, episode2, episode3 ];
 
 /* ========================================================================
    STATE
@@ -920,6 +1297,9 @@ let selected = { q1:[], q2:null, q3:null };
 let clearedEpisodes = new Set();
 let hintLevel = "standard"; // "standard" | "hard"
 let cluesUsed = 0;
+let confrontRound = 0;
+let confrontStage = "question"; // "question" | "hit" | "gameover" | "confession"
+let confrontLog = [];
 
 /* ========================================================================
    EPISODE SELECT SCREEN
@@ -963,6 +1343,9 @@ function loadEpisode(ep){
   selected = { q1:[], q2:null, q3:null };
   hintLevel = "standard";
   cluesUsed = 0;
+  confrontRound = 0;
+  confrontStage = "question";
+  confrontLog = [];
   currentLoc = ep.locations[0].id;
 
   document.getElementById("epCrumb").style.display = "inline-block";
@@ -1141,6 +1524,7 @@ function goPhase(n){
   window.scrollTo({top:0, behavior:"smooth"});
   if(n===1){ renderTabs(); renderClues(); renderNotebook(); checkDeductionUnlock(); }
   if(n===2){ renderDeduction(); }
+  if(n===3){ renderConfrontation(); }
 }
 
 /* ========================================================================
@@ -1240,9 +1624,158 @@ function submitDeduction(){
   const q1Correct = arraysMatchAsSets(selected.q1, ep.correct.q1);
   const correct = q1Correct && selected.q2===ep.correct.q2 && selected.q3===ep.correct.q3;
   const correctCount = [q1Correct, selected.q2===ep.correct.q2, selected.q3===ep.correct.q3].filter(Boolean).length;
+  pendingCorrectCount = correctCount;
+
+  if(correct && ep.confrontation){
+    // Correct deduction unlocks the face-to-face confrontation challenge.
+    confrontRound = 0;
+    confrontStage = "question";
+    confrontLog = [];
+    goPhase(3);
+    return;
+  }
+
   if(correct) clearedEpisodes.add(ep.id);
   renderResult(correct, correctCount);
-  goPhase(3);
+  goPhase(4);
+}
+let pendingCorrectCount = 0;
+
+/* ========================================================================
+   CONFRONTATION MINI-GAME
+   ------------------------------------------------------------------------
+   Shown only when a solved episode defines ep.confrontation. The culprit
+   pushes back once per round; the player must pick the one piece of
+   evidence from a shuffled set that actually counters that specific
+   pushback. Wrong pick -> the culprit talks their way out (game over,
+   retry available). Right pick through every round -> full confession.
+   ======================================================================== */
+let shuffledConfrontOpts = [];
+
+function renderConfrontation(){
+  const ep = currentEpisode;
+  const conf = ep.confrontation;
+  const wrap = document.getElementById("confrontContent");
+
+  const logHtml = confrontLog.map(entry => `
+    <div class="confront-entry">
+      <div class="confront-bubble culprit"><span class="cb-name">${conf.culpritName}</span>${entry.rebuttal}</div>
+      <div class="confront-bubble detective"><span class="cb-name">天才探偵</span>${entry.chosenLabel}</div>
+    </div>
+  `).join("");
+
+  if(confrontStage === "gameover"){
+    wrap.innerHTML = `
+      <div class="confront-intro">${logHtml}</div>
+      <div class="confront-gameover">
+        <div class="go-title display">TAKEN IN — 取り逃がした</div>
+        <p>${conf.gameOverText}</p>
+        <div class="cta-row" style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn" onclick="retryConfrontation()">この場面をやり直す</button>
+          <button class="btn ghost" onclick="goPhase(1)">捜査に戻る</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if(confrontStage === "confession"){
+    wrap.innerHTML = `
+      <div class="confront-intro">${logHtml}</div>
+      <div class="confront-confession">
+        <div class="cf-title display">陥落 —— 観念する</div>
+        ${conf.finalConfession.map(p=>`<p>${p}</p>`).join("")}
+        <div class="cta-row">
+          <button class="btn" onclick="finishConfrontation()">解決編を見る →</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const round = conf.rounds[confrontRound];
+
+  if(confrontStage === "hit"){
+    wrap.innerHTML = `
+      <div class="confront-intro">${logHtml}</div>
+      <div class="confront-entry">
+        <div class="confront-bubble culprit"><span class="cb-name">${conf.culpritName}</span>${round.rebuttal}</div>
+        <div class="confront-bubble detective"><span class="cb-name">天才探偵</span>${round.correctLabel}</div>
+      </div>
+      <div class="confront-hit">
+        <p>${round.hit}</p>
+        <div class="cta-row">
+          <button class="btn" onclick="advanceConfrontation()">${confrontRound+1>=conf.rounds.length ? '決着をつける →' : '反論を続ける →'}</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // stage === "question"
+  if(confrontRound===0 && confrontLog.length===0){
+    wrap.innerHTML = `<div class="confront-intro"><p class="confront-setup">${conf.intro}</p></div>`;
+  } else {
+    wrap.innerHTML = `<div class="confront-intro">${logHtml}</div>`;
+  }
+
+  shuffledConfrontOpts = shuffleArr(round.options);
+  const optsHtml = shuffledConfrontOpts.map((o,i)=>`
+    <div class="eopt" onclick="chooseEvidence(${i})">
+      <div class="eopt-label">${o.label}</div>
+    </div>
+  `).join("");
+
+  wrap.innerHTML += `
+    <div class="confront-round">
+      <div class="confront-round-num">対決 ${confrontRound+1} / ${conf.rounds.length}</div>
+      <div class="confront-bubble culprit"><span class="cb-name">${conf.culpritName}</span>${round.rebuttal}</div>
+      <div class="confront-prompt">どの証拠を突きつけますか？</div>
+      <div class="eopt-grid">${optsHtml}</div>
+    </div>
+  `;
+}
+
+function chooseEvidence(i){
+  const ep = currentEpisode;
+  const conf = ep.confrontation;
+  const round = conf.rounds[confrontRound];
+  const opt = shuffledConfrontOpts[i];
+
+  if(opt.correct){
+    confrontLog.push({ rebuttal: round.rebuttal, chosenLabel: opt.label });
+    round.correctLabel = opt.label;
+    confrontStage = "hit";
+  } else {
+    confrontStage = "gameover";
+  }
+  renderConfrontation();
+}
+
+function advanceConfrontation(){
+  const ep = currentEpisode;
+  const conf = ep.confrontation;
+  confrontRound++;
+  if(confrontRound >= conf.rounds.length){
+    confrontStage = "confession";
+  } else {
+    confrontStage = "question";
+  }
+  renderConfrontation();
+}
+
+function retryConfrontation(){
+  confrontRound = 0;
+  confrontStage = "question";
+  confrontLog = [];
+  renderConfrontation();
+}
+
+function finishConfrontation(){
+  const ep = currentEpisode;
+  clearedEpisodes.add(ep.id);
+  renderResult(true, pendingCorrectCount);
+  goPhase(4);
 }
 
 /* ========================================================================
