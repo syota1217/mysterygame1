@@ -219,6 +219,7 @@
   }
   .loc-tab.active{ color:var(--gold); border-color:var(--gold-soft); background:var(--panel-light); }
   .loc-tab .count{ color:var(--ink-faint); font-size:10px; margin-left:4px; }
+  .unlock-hint{ font-size:11px; color:var(--ink-faint); margin:-6px 0 18px; letter-spacing:.03em; }
 
   .clue-list{ display:flex; flex-direction:column; gap:12px; }
   .clue-card{ background:var(--panel); border:1px solid var(--line); border-radius:2px; overflow:hidden; }
@@ -370,6 +371,7 @@
     <div class="investigate-layout">
       <div>
         <div class="loc-tabs" id="locTabs"></div>
+        <p class="unlock-hint">※ 捜査を進めると、新たな調査対象が追加されることがあります。</p>
         <div class="clue-list" id="clueList"></div>
         <div class="stepper-row">
           <button class="btn ghost" onclick="goPhase(0)">← 序章に戻る</button>
@@ -412,15 +414,34 @@
    3. Set `status` to "available" (or "locked" to show a "coming soon" card).
    4. Fill `locations` (tabs) and `clues` (investigation cards). Each clue's
       `evidence` array feeds the notebook sidebar automatically.
+      Aim for roughly 70% of clues to be genuinely necessary to solve the
+      case and ~30% to be plausible-but-irrelevant red herrings (list the
+      latter in `redHerrings` — see step 6). Any clue that would make the
+      culprit obvious the moment it's visible should sit behind a gate:
+      give the location (or add to a clue) `unlockAfter:"<clueId>"` so it
+      only appears once the player has found the clue that justifies
+      looking there (e.g. the culprit's own tab shouldn't be browsable
+      until some prior evidence points at them). `investigationBudget`
+      should stay noticeably below the total clue count so the player
+      can't just read everything.
    5. Give each `cast` member a unique `id` — these double as the Question 1
       suspect checklist (multi-select: 1 id for a solo culprit, 2+ for a
       conspiracy). Fill `questions.q2/q3` (single-choice) and `correct`
       (`correct.q1` is an array of cast ids; `correct.q2`/`q3` are option ids).
    6. Fill `solutionSections`, `evidenceTable`, `epilogue`, and optionally
-      `altRoute` (an alternate "what if" ending shown after solving).
-   7. Push the new object into the `episodes` array at the bottom.
-   That's it — the select screen, prologue, investigation, deduction and
-   result screens are all rendered generically from this data.
+      `altRoute` (an alternate "what if" ending shown after solving) and
+      `redHerrings` (recap of the misleading clues from step 4).
+   7. Optionally add `confrontation` (see episode2/episode3 for the shape:
+      `culpritName`, `intro`, `rounds` — each with a `rebuttal`, a `hit`
+      comeback line, and 3–4 `options` where exactly one has `correct:true`
+      — plus `finalConfession` and `gameOverText`). When present, a correct
+      deduction leads into this face-off instead of straight to the result;
+      picking a wrong option ends in a game over. Skip this field entirely
+      to go straight from a correct deduction to the result screen.
+   8. Push the new object into the `episodes` array at the bottom.
+   That's it — the select screen, prologue, investigation, deduction,
+   confrontation, and result screens are all rendered generically from
+   this data.
    ======================================================================== */
 
 const episode1 = {
@@ -451,10 +472,10 @@ const episode1 = {
     { id:"kura",     label:"倉庫・薬品" },
     { id:"papers",   label:"書斎の書類" },
     { id:"takayuki", label:"長男・隆之" },
-    { id:"hiiragi",  label:"秘書・柊" },
+    { id:"hiiragi",  label:"秘書・柊", unlockAfter:"c7" },
     { id:"tahara",   label:"執事・田原" },
     { id:"relations",label:"人間関係" },
-    { id:"search",   label:"密かな捜索" },
+    { id:"search",   label:"密かな捜索", unlockAfter:"c13" },
   ],
 
   investigationBudget: 12,
@@ -702,8 +723,8 @@ const episode2 = {
     { id:"toono",     label:"秘書・遠野" },
     { id:"kamio",     label:"神尾貴之" },
     { id:"kurosawa",  label:"黒沢涼子" },
-    { id:"fuyuko",    label:"後妻・冬子" },
-    { id:"search",    label:"身辺調査" },
+    { id:"fuyuko",    label:"後妻・冬子", unlockAfter:"t10" },
+    { id:"search",    label:"身辺調査", unlockAfter:"t20" },
   ],
 
   investigationBudget: 14,
@@ -713,7 +734,7 @@ const episode2 = {
     { id:"t1", loc:"scene", title:"個室の発見時の状況", sub:"施錠された特別個室",
       body:[
         "扉は内側から施錠されていた（車掌長がマスターキーで開錠）。窓は走行中の振動防止のため開閉不可の固定式。",
-        "室内に争った形跡はなく、身の回り品も整頓されたまま。支倉はベッド脇のテーブルにもたれるように倒れており、表情は苦しげに歪んでいた（前回の事件とは対照的）。"
+        "室内に争った形跡はなく、身の回り品も整頓されたまま。支倉はベッド脇のテーブルにもたれるように倒れており、表情は苦しげに歪んでいた。"
       ],
       evidence:["個室は内側から施錠された状態で発見された","室内に争った形跡はなかった","支倉の表情は苦しげだった"]
     },
@@ -948,7 +969,7 @@ const episode2 = {
 
   solutionSections: [
     { title:"第一部　現場の矛盾",
-      html:"支倉の遺体には苦悶の表情があり、ブランデーグラスと、ほぼ空になった心臓病用の常備薬の瓶が残されていた。前回の事件とは対照的に、今回は<strong>薬物の過剰摂取による中毒症状</strong>がそのまま表れた形での死だった。" },
+      html:"支倉の遺体には苦悶の表情があり、ブランデーグラスと、ほぼ空になった心臓病用の常備薬の瓶が残されていた。<strong>薬物の過剰摂取による中毒症状</strong>がそのまま表れた形での死だった。" },
     { title:"第二部　密室の謎",
       html:"個室は内側から施錠された状態で発見されたが、車掌長の実演により、この客室の旧式の内鍵構造は鍵穴から工具を差し込むことで<strong>外側からでも施錠・解錠が可能</strong>だと判明した。鍵穴周辺の擦り傷は、この手口が実際に使われたことを示していた。" },
     { title:"第三部　二つの事件の交差",
@@ -1021,7 +1042,7 @@ const episode3 = {
     { id:"relations", label:"人間関係" },
     { id:"kaede",     label:"メイク・楓" },
     { id:"tooyama",   label:"支配人・遠山" },
-    { id:"search",    label:"身辺調査" },
+    { id:"search",    label:"身辺調査", unlockAfter:"g13" },
     { id:"dagger",    label:"懐剣の謎" },
     { id:"yuzuki",    label:"脚本家・柚木" },
     { id:"yuto",      label:"息子・悠人" },
@@ -1408,6 +1429,7 @@ function renderTabs(){
   const wrap = document.getElementById("locTabs");
   wrap.innerHTML = "";
   ep.locations.forEach(loc=>{
+    if(loc.unlockAfter && !openedClues.has(loc.unlockAfter)) return; // not yet unlocked — stay hidden
     const total = ep.clues.filter(c=>c.loc===loc.id).length;
     const done = ep.clues.filter(c=>c.loc===loc.id && openedClues.has(c.id)).length;
     const el = document.createElement("div");
@@ -1698,10 +1720,6 @@ function renderConfrontation(){
   if(confrontStage === "hit"){
     wrap.innerHTML = `
       <div class="confront-intro">${logHtml}</div>
-      <div class="confront-entry">
-        <div class="confront-bubble culprit"><span class="cb-name">${conf.culpritName}</span>${round.rebuttal}</div>
-        <div class="confront-bubble detective"><span class="cb-name">天才探偵</span>${round.correctLabel}</div>
-      </div>
       <div class="confront-hit">
         <p>${round.hit}</p>
         <div class="cta-row">
