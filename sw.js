@@ -1,4 +1,4 @@
-const CACHE_NAME = "jikenbo-cache-v1";
+const CACHE_NAME = "jikenbo-cache-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -6,7 +6,14 @@ const APP_SHELL = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png",
-  "./favicon.ico"
+  "./favicon.ico",
+  "./covers/ep1.jpg",
+  "./covers/ep2.jpg",
+  "./covers/ep3.jpg",
+  "./covers/ep4.jpg",
+  "./covers/ep5.jpg",
+  "./covers/ep6.jpg",
+  "./covers/ep7.jpg"
 ];
 
 self.addEventListener("install", (event) => {
