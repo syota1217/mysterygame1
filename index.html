@@ -36,9 +36,14 @@
     --crimson:#8f2a35;
     --crimson-bright:#b8394a;
     --gold:#b9924f;
+    --gold-bright:#d4af74;
     --gold-soft:#8a7143;
     --line:#33384a;
     --shadow-deep: 0 20px 60px rgba(0,0,0,0.55);
+    --glow-gold: rgba(185,146,79,0.45);
+    --glow-crimson: rgba(184,57,74,0.45);
+    --glass-bg: rgba(27,30,41,0.55);
+    --glass-border: rgba(185,146,79,0.22);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -61,6 +66,20 @@
       repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0px, transparent 1px, transparent 2px);
     pointer-events:none;
     z-index:0;
+  }
+  body::after{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(480px 320px at 12% 8%, rgba(185,146,79,0.10), transparent 70%),
+      radial-gradient(560px 380px at 88% 85%, rgba(184,57,74,0.09), transparent 70%);
+    pointer-events:none;
+    z-index:0;
+    animation: ambientDrift 18s ease-in-out infinite alternate;
+  }
+  @keyframes ambientDrift{
+    0%{ opacity:.7; transform:translateY(0px); }
+    100%{ opacity:1; transform:translateY(14px); }
   }
 
   .app{
@@ -120,15 +139,35 @@
   .sf-text{ font-size:12.5px; color:var(--ink-dim); margin:0; }
 
   .phase-rail{
-    display:flex; justify-content:center; gap:0; margin-top:26px;
-    font-size:12px; letter-spacing:.1em; color:var(--ink-faint);
+    display:flex; justify-content:center; align-items:center; gap:0; margin-top:30px;
+    font-size:11.5px; letter-spacing:.1em; color:var(--ink-faint);
   }
-  .phase-rail .p{ padding:6px 18px; position:relative; }
+  .phase-rail .p{
+    padding:6px 20px 6px 30px; position:relative; transition:color .25s ease;
+  }
+  .phase-rail .p::before{
+    content:""; position:absolute; left:8px; top:50%; transform:translateY(-50%);
+    width:8px; height:8px; border-radius:50%;
+    background:var(--void-deep); border:1px solid var(--ink-faint);
+    transition:all .3s ease;
+  }
   .phase-rail .p:not(:last-child)::after{
-    content:"—"; position:absolute; right:-6px; color:var(--line);
+    content:""; position:absolute; left:20px; top:50%; transform:translateY(-50%);
+    width:calc(100% - 8px); height:1px; background:var(--line);
   }
   .phase-rail .p.active{ color:var(--gold); font-weight:700; }
+  .phase-rail .p.active::before{
+    background:var(--gold); border-color:var(--gold);
+    box-shadow:0 0 10px var(--glow-gold), 0 0 0 3px rgba(185,146,79,0.18);
+    animation:railPulse 1.8s ease-in-out infinite;
+  }
   .phase-rail .p.done{ color:var(--ink-dim); }
+  .phase-rail .p.done::before{ background:var(--gold-soft); border-color:var(--gold-soft); }
+  .phase-rail .p.done:not(:last-child)::after{ background:var(--gold-soft); opacity:.4; }
+  @keyframes railPulse{
+    0%,100%{ box-shadow:0 0 10px var(--glow-gold), 0 0 0 3px rgba(185,146,79,0.18); }
+    50%{ box-shadow:0 0 16px var(--glow-gold), 0 0 0 5px rgba(185,146,79,0.1); }
+  }
 
   .screen{ display:none; animation:fadeIn .5s ease; }
   .screen.visible{ display:block; }
@@ -148,32 +187,41 @@
     gap:20px; margin:20px 0 0;
   }
   .case-card{
-    background:var(--panel); border:1px solid var(--line); border-radius:2px;
+    background:var(--glass-bg);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid var(--line); border-radius:10px;
     position:relative; overflow:hidden; cursor:pointer;
-    transition:border-color .15s ease, transform .15s ease;
+    transition:border-color .25s ease, transform .25s cubic-bezier(.2,.8,.3,1.1), box-shadow .25s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
   }
-  .case-card:hover{ border-color:var(--gold-soft); transform:translateY(-2px); }
+  .case-card:hover{
+    border-color:var(--gold-soft); transform:translateY(-5px) scale(1.012);
+    box-shadow:0 18px 44px rgba(0,0,0,0.5), 0 0 26px var(--glow-gold);
+  }
   .case-card.locked{ cursor:default; opacity:.5; }
-  .case-card.locked:hover{ transform:none; border-color:var(--line); }
+  .case-card.locked:hover{ transform:none; border-color:var(--line); box-shadow:0 10px 30px rgba(0,0,0,0.35); }
   .case-cover-wrap{ position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; background:var(--void-deep); }
-  .case-cover{ width:100%; height:100%; object-fit:cover; display:block; }
-  .case-cover-fade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(27,30,41,0) 55%, var(--panel) 100%); }
+  .case-cover{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s cubic-bezier(.2,.8,.3,1); }
+  .case-card:hover .case-cover{ transform:scale(1.06); }
+  .case-cover-fade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(27,30,41,0) 45%, rgba(20,22,30,0.92) 100%); }
   .case-cover-placeholder{ width:100%; aspect-ratio:16/9; background:linear-gradient(160deg, var(--panel-light), var(--void-deep)); display:flex; align-items:center; justify-content:center; color:var(--ink-faint); font-size:11px; letter-spacing:.1em; }
   .case-body{ padding:20px 24px 26px; }
-  .case-num{ font-size:11px; letter-spacing:.2em; color:var(--gold); margin-bottom:10px; }
+  .case-num{ font-size:11px; letter-spacing:.2em; color:var(--gold); margin-bottom:10px; text-shadow:0 0 12px rgba(185,146,79,0.35); }
   .case-title{ font-family:'Shippori Mincho',serif; font-size:21px; color:var(--paper); margin-bottom:6px; }
   .case-sub{ font-size:12px; color:var(--ink-faint); margin-bottom:14px; letter-spacing:.08em; }
   .case-teaser{ font-size:13px; color:var(--ink-dim); margin-bottom:16px; }
   .case-status{
     font-size:11px; letter-spacing:.1em; display:inline-block;
-    padding:4px 10px; border-radius:20px; border:1px solid var(--gold-soft); color:var(--gold);
+    padding:4px 12px; border-radius:20px; border:1px solid var(--gold-soft); color:var(--gold);
+    box-shadow:0 0 10px rgba(185,146,79,0.18);
   }
-  .case-status.cleared{ border-color:#6a8f6f; color:#8fb894; }
-  .case-status.locked{ border-color:var(--line); color:var(--ink-faint); }
+  .case-status.cleared{ border-color:#6a8f6f; color:#8fb894; box-shadow:0 0 10px rgba(140,184,148,0.2); }
+  .case-status.locked{ border-color:var(--line); color:var(--ink-faint); box-shadow:none; }
 
   /* ===== Prologue ===== */
   .prologue{ max-width:720px; margin:40px auto; text-align:left; }
-  .prologue-banner{ position:relative; width:100%; aspect-ratio:16/9; border-radius:2px; overflow:hidden; margin-bottom:28px; border:1px solid var(--line); }
+  .prologue-banner{ position:relative; width:100%; aspect-ratio:16/9; border-radius:10px; overflow:hidden; margin-bottom:28px; border:1px solid var(--line); box-shadow:0 16px 40px rgba(0,0,0,0.4); }
   .prologue-banner img{ width:100%; height:100%; object-fit:cover; display:block; }
   .prologue-banner-fade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,12,18,0) 60%, var(--void) 100%); }
   .prologue p{ margin:0 0 20px; color:var(--ink); font-size:16px; }
@@ -213,25 +261,37 @@
   .cta-row{ text-align:center; margin-top:40px; }
   button.btn{
     font-family:'Shippori Mincho',serif;
-    background:var(--crimson);
-    color:#f4ece1;
-    border:1px solid var(--crimson-bright);
+    position:relative;
+    background:linear-gradient(155deg, var(--crimson-bright) 0%, var(--crimson) 55%, #6e1f28 100%);
+    color:#f8f1e6;
+    border:1px solid rgba(255,255,255,0.14);
     padding:14px 38px;
     font-size:15px;
     letter-spacing:.15em;
     cursor:pointer;
-    border-radius:2px;
-    transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
-    box-shadow:0 8px 24px rgba(143,42,53,0.3);
+    border-radius:6px;
+    overflow:hidden;
+    transition:transform .18s cubic-bezier(.2,.9,.3,1.2), box-shadow .2s ease, filter .2s ease;
+    box-shadow:0 10px 28px rgba(143,42,53,0.38), 0 0 0 1px rgba(0,0,0,0.2) inset, 0 1px 0 rgba(255,255,255,0.12) inset;
   }
-  button.btn:hover{ background:var(--crimson-bright); transform:translateY(-1px); }
-  button.btn:active{ transform:translateY(0px); }
+  button.btn::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.16) 45%, transparent 60%);
+    transform:translateX(-120%);
+    transition:transform .6s ease;
+    pointer-events:none;
+  }
+  button.btn:hover::after{ transform:translateX(120%); }
+  button.btn:hover{ transform:translateY(-2px); box-shadow:0 14px 34px rgba(143,42,53,0.48), 0 0 20px var(--glow-crimson), 0 1px 0 rgba(255,255,255,0.16) inset; filter:brightness(1.05); }
+  button.btn:active{ transform:translateY(0px) scale(.98); }
   button.btn.ghost{
-    background:transparent; color:var(--gold); border:1px solid var(--gold-soft);
-    box-shadow:none;
+    background:rgba(185,146,79,0.06); color:var(--gold); border:1px solid var(--gold-soft);
+    box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;
   }
-  button.btn.ghost:hover{ background:rgba(185,146,79,0.1); }
-  button.btn:disabled{ opacity:.35; cursor:not-allowed; transform:none; }
+  button.btn.ghost::after{ background:linear-gradient(120deg, transparent 30%, rgba(185,146,79,0.18) 45%, transparent 60%); }
+  button.btn.ghost:hover{ background:rgba(185,146,79,0.14); box-shadow:0 0 16px rgba(185,146,79,0.25), 0 1px 0 rgba(255,255,255,0.05) inset; }
+  button.btn:disabled{ opacity:.35; cursor:not-allowed; transform:none; box-shadow:none; }
+  button.btn:disabled::after{ display:none; }
 
   /* ===== Investigation layout ===== */
   .investigate-layout{
@@ -251,34 +311,41 @@
   .unlock-hint{ font-size:11px; color:var(--ink-faint); margin:-6px 0 18px; letter-spacing:.03em; }
 
   .clue-list{ display:flex; flex-direction:column; gap:12px; }
-  .clue-card{ background:var(--panel); border:1px solid var(--line); border-radius:2px; overflow:hidden; }
+  .clue-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden;
+    transition:border-color .25s ease, box-shadow .25s ease;
+  }
+  .clue-card:hover{ border-color:rgba(185,146,79,0.35); box-shadow:0 8px 22px rgba(0,0,0,0.3); }
   .clue-card.locked-out{ opacity:.4; }
   .clue-card.locked-out .clue-head{ cursor:not-allowed; }
   .clue-card.locked-out .clue-head:hover{ background:none; }
   .clue-card.locked-out .clue-mark{ color:var(--crimson-bright); border-color:var(--crimson); }
-  .clue-head{ display:flex; justify-content:space-between; align-items:center; padding:16px 18px; cursor:pointer; user-select:none; }
+  .clue-head{ display:flex; justify-content:space-between; align-items:center; padding:16px 18px; cursor:pointer; user-select:none; transition:background .2s ease; }
   .clue-head:hover{ background:var(--panel-light); }
   .clue-title{ font-family:'Shippori Mincho',serif; font-size:16px; color:var(--paper); }
   .clue-sub{ font-size:11px; color:var(--ink-faint); margin-top:3px; letter-spacing:.05em; }
-  .clue-mark{ font-size:11px; color:var(--gold); border:1px solid var(--gold-soft); padding:3px 9px; border-radius:20px; white-space:nowrap; margin-left:12px; }
+  .clue-mark{ font-size:11px; color:var(--gold); border:1px solid var(--gold-soft); padding:3px 9px; border-radius:20px; white-space:nowrap; margin-left:12px; transition:all .2s ease; }
   .clue-mark.unread{ color:var(--ink-faint); border-color:var(--line); }
-  .clue-body{ max-height:0; overflow:hidden; transition:max-height .35s ease; border-top:1px solid var(--line); }
+  .clue-card:not(.locked-out) .clue-mark:not(.unread){ box-shadow:0 0 8px rgba(185,146,79,0.3); }
+  .clue-body{ max-height:0; overflow:hidden; transition:max-height .4s cubic-bezier(.2,.8,.3,1); border-top:1px solid var(--line); }
   .clue-body.open{ max-height:1200px; }
   .clue-body-inner{ padding:18px 20px 22px; }
   .clue-body-inner p{ margin:0 0 14px; color:var(--ink); font-size:14.5px; }
   .clue-body-inner p:last-child{ margin-bottom:0; }
-  .quote{ border-left:2px solid var(--gold-soft); padding:10px 16px; margin:14px 0; background:rgba(185,146,79,0.06); color:var(--paper); font-size:14px; }
-  .evidence-tag{ display:inline-block; margin-top:6px; margin-right:6px; font-size:11px; color:var(--void); background:var(--gold); padding:3px 10px; border-radius:2px; letter-spacing:.05em; }
+  .quote{ border-left:2px solid var(--gold-soft); padding:10px 16px; margin:14px 0; background:rgba(185,146,79,0.06); color:var(--paper); font-size:14px; border-radius:0 4px 4px 0; }
+  .evidence-tag{ display:inline-block; margin-top:6px; margin-right:6px; font-size:11px; color:var(--void); background:linear-gradient(135deg, var(--gold-bright,#d4af74), var(--gold)); padding:3px 10px; border-radius:4px; letter-spacing:.05em; box-shadow:0 2px 8px rgba(185,146,79,0.3); }
 
   .notebook{
-    background:var(--paper); color:#2a2418; border-radius:2px;
+    background:linear-gradient(165deg, var(--paper) 0%, var(--paper-dark) 130%);
+    color:#2a2418; border-radius:10px;
     padding:22px 20px; position:sticky; top:20px;
-    box-shadow:var(--shadow-deep);
+    box-shadow:var(--shadow-deep), 0 0 0 1px rgba(185,146,79,0.15);
     border:1px solid var(--paper-dark);
   }
   .notebook h3{ font-family:'Shippori Mincho',serif; margin:0 0 4px; font-size:17px; border-bottom:2px solid #2a2418; padding-bottom:10px; }
   .notebook .nb-sub{ font-size:11px; color:#6b6148; margin-bottom:14px; letter-spacing:.06em;}
-  .nb-item{ font-size:12.5px; padding:9px 0; border-bottom:1px dashed #c9bc98; display:flex; gap:8px; }
+  .nb-item{ font-size:12.5px; padding:9px 0; border-bottom:1px dashed #c9bc98; display:flex; gap:8px; animation:nbItemIn .3s ease; }
+  @keyframes nbItemIn{ from{ opacity:0; transform:translateX(-6px); } to{ opacity:1; transform:translateX(0); } }
   .nb-item:last-child{ border-bottom:none; }
   .nb-item .dot{ color:var(--crimson); flex-shrink:0; }
   .nb-empty{ font-size:12px; color:#8a7f60; font-style:italic; }
@@ -294,63 +361,73 @@
   .q-block{ background:var(--panel); border:1px solid var(--line); border-radius:2px; padding:26px 26px 22px; margin-bottom:22px; }
   .q-num{ font-size:11px; color:var(--gold); letter-spacing:.15em; margin-bottom:8px;}
   .q-text{ font-family:'Shippori Mincho',serif; font-size:19px; color:var(--paper); margin-bottom:18px; }
-  .opt{ display:flex; align-items:flex-start; gap:12px; padding:13px 16px; margin-bottom:8px; border:1px solid var(--line); border-radius:2px; cursor:pointer; transition:all .15s ease; }
-  .opt:hover{ border-color:var(--gold-soft); background:var(--panel-light); }
-  .opt.selected{ border-color:var(--gold); background:rgba(185,146,79,0.1); }
+  .opt{ display:flex; align-items:flex-start; gap:12px; padding:13px 16px; margin-bottom:8px; border:1px solid var(--line); border-radius:8px; cursor:pointer; transition:all .2s cubic-bezier(.2,.8,.3,1.1); }
+  .opt:hover{ border-color:var(--gold-soft); background:var(--panel-light); transform:translateX(2px); }
+  .opt.selected{ border-color:var(--gold); background:rgba(185,146,79,0.12); box-shadow:0 0 14px rgba(185,146,79,0.15); }
   .opt input{ margin-top:3px; accent-color:var(--crimson); }
   .opt-label{ font-size:14px; color:var(--ink); }
 
   /* ===== Confrontation ===== */
   .confront-wrap{ max-width:720px; margin:0 auto; }
-  .confront-setup{ font-size:14.5px; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:2px; padding:20px 22px; margin-bottom:22px; }
+  .confront-setup{ font-size:14.5px; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:20px 22px; margin-bottom:22px; box-shadow:0 8px 24px rgba(0,0,0,0.3); }
   .confront-entry{ margin-bottom:16px; }
-  .confront-bubble{ max-width:90%; padding:13px 16px; border-radius:2px; font-size:14px; line-height:1.7; margin-bottom:8px; position:relative; }
+  .confront-bubble{ max-width:90%; padding:13px 16px; border-radius:12px; font-size:14px; line-height:1.7; margin-bottom:8px; position:relative; box-shadow:0 6px 18px rgba(0,0,0,0.28); }
   .confront-bubble .cb-name{ display:block; font-size:10.5px; letter-spacing:.1em; color:var(--ink-faint); margin-bottom:4px; }
-  .confront-bubble.culprit{ background:rgba(143,42,53,0.12); border:1px solid var(--crimson); color:var(--paper); margin-right:auto; }
+  .confront-bubble.culprit{ background:linear-gradient(155deg, rgba(143,42,53,0.22), rgba(143,42,53,0.08)); border:1px solid var(--crimson); color:var(--paper); margin-right:auto; border-bottom-left-radius:2px; }
   .confront-bubble.culprit .cb-name{ color:var(--crimson-bright); }
-  .confront-bubble.detective{ background:rgba(185,146,79,0.1); border:1px solid var(--gold-soft); color:var(--paper); margin-left:auto; text-align:right; }
+  .confront-bubble.detective{ background:linear-gradient(155deg, rgba(185,146,79,0.18), rgba(185,146,79,0.06)); border:1px solid var(--gold-soft); color:var(--paper); margin-left:auto; text-align:right; border-bottom-right-radius:2px; }
   .confront-bubble.detective .cb-name{ color:var(--gold); }
   .confront-round{ margin-top:6px; }
-  .confront-round-num{ text-align:center; font-size:11px; letter-spacing:.15em; color:var(--gold); margin-bottom:14px; }
+  .confront-round-num{ text-align:center; font-size:11px; letter-spacing:.15em; color:var(--gold); margin-bottom:14px; text-shadow:0 0 10px rgba(185,146,79,0.3); }
   .confront-prompt{ text-align:center; font-size:13px; color:var(--ink-dim); margin:18px 0 12px; }
   .eopt-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   @media(max-width:600px){ .eopt-grid{ grid-template-columns:1fr; } }
   .eopt{
-    background:var(--panel); border:1px solid var(--line); border-radius:2px;
-    padding:16px 16px; cursor:pointer; transition:all .15s ease; text-align:center;
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    padding:16px 16px; cursor:pointer; transition:all .2s cubic-bezier(.2,.8,.3,1.1); text-align:center;
+    position:relative; overflow:hidden;
   }
-  .eopt:hover{ border-color:var(--gold); background:var(--panel-light); transform:translateY(-1px); }
-  .eopt-label{ font-size:13.5px; color:var(--ink); }
-  .confront-hit{ text-align:center; background:var(--panel); border:1px solid var(--gold-soft); border-radius:2px; padding:22px; margin-top:10px; }
+  .eopt::before{
+    content:""; position:absolute; inset:0; opacity:0;
+    background:radial-gradient(circle at 50% 0%, rgba(185,146,79,0.18), transparent 70%);
+    transition:opacity .2s ease;
+  }
+  .eopt:hover{ border-color:var(--gold); background:var(--panel-light); transform:translateY(-3px); box-shadow:0 10px 24px rgba(0,0,0,0.35), 0 0 16px rgba(185,146,79,0.15); }
+  .eopt:hover::before{ opacity:1; }
+  .eopt-label{ font-size:13.5px; color:var(--ink); position:relative; }
+  .confront-hit{ text-align:center; background:var(--panel); border:1px solid var(--gold-soft); border-radius:10px; padding:22px; margin-top:10px; box-shadow:0 0 24px rgba(185,146,79,0.12); animation:hitPop .35s ease; }
+  @keyframes hitPop{ from{ transform:scale(.97); opacity:0; } to{ transform:scale(1); opacity:1; } }
   .confront-hit p{ color:var(--paper); font-size:14.5px; margin:0 0 16px; }
-  .confront-gameover{ text-align:center; background:rgba(143,42,53,0.1); border:1px solid var(--crimson); border-radius:2px; padding:30px 26px; margin-top:14px; }
-  .go-title{ font-size:24px; color:var(--crimson-bright); letter-spacing:.1em; margin-bottom:14px; }
+  .confront-gameover{ text-align:center; background:radial-gradient(ellipse at 50% 0%, rgba(143,42,53,0.22), rgba(143,42,53,0.06)); border:1px solid var(--crimson); border-radius:10px; padding:30px 26px; margin-top:14px; box-shadow:0 0 30px rgba(184,57,74,0.18); }
+  .go-title{ font-size:24px; color:var(--crimson-bright); letter-spacing:.1em; margin-bottom:14px; text-shadow:0 0 14px rgba(184,57,74,0.5); }
   .confront-gameover p{ color:var(--ink); font-size:14.5px; margin-bottom:20px; }
-  .confront-confession{ background:var(--panel); border:1px solid var(--gold); border-radius:2px; padding:28px 26px; margin-top:14px; }
-  .cf-title{ font-size:22px; color:var(--gold); letter-spacing:.1em; margin-bottom:16px; text-align:center; }
+  .confront-confession{ background:linear-gradient(165deg, var(--panel), var(--panel-light)); border:1px solid var(--gold); border-radius:10px; padding:28px 26px; margin-top:14px; box-shadow:0 0 30px rgba(185,146,79,0.15); }
+  .cf-title{ font-size:22px; color:var(--gold); letter-spacing:.1em; margin-bottom:16px; text-align:center; text-shadow:0 0 16px rgba(185,146,79,0.4); }
   .confront-confession p{ color:var(--ink); font-size:14.5px; margin:0 0 14px; }
 
   /* ===== Decision cards (branching choices) ===== */
   .decision-card{
-    background:linear-gradient(180deg, rgba(143,42,53,0.1), var(--panel));
-    border:1px solid var(--crimson); border-radius:2px; padding:20px 20px 22px; margin-bottom:12px;
+    background:linear-gradient(165deg, rgba(143,42,53,0.14), var(--panel));
+    border:1px solid var(--crimson); border-radius:10px; padding:20px 20px 22px; margin-bottom:12px;
+    box-shadow:0 10px 28px rgba(143,42,53,0.15);
   }
   .decision-warn{
     display:inline-flex; align-items:center; gap:6px; font-size:10.5px; letter-spacing:.12em;
     color:var(--crimson-bright); border:1px solid var(--crimson); padding:3px 10px; border-radius:20px; margin-bottom:12px;
+    animation:railPulse 2s ease-in-out infinite;
   }
   .decision-warn::before{ content:"⚠"; }
   .decision-prompt{ font-family:'Shippori Mincho',serif; font-size:16px; color:var(--paper); margin-bottom:6px; }
   .decision-hint{ font-size:11.5px; color:var(--ink-faint); margin-bottom:16px; }
   .decision-choices{ display:flex; flex-direction:column; gap:8px; }
   .decision-choice{
-    background:var(--panel-light); border:1px solid var(--line); border-radius:2px;
+    background:var(--panel-light); border:1px solid var(--line); border-radius:8px;
     padding:13px 16px; cursor:pointer; font-size:13.5px; color:var(--ink); text-align:left;
-    transition:all .15s ease;
+    transition:all .2s cubic-bezier(.2,.8,.3,1.1);
   }
-  .decision-choice:hover{ border-color:var(--gold); background:rgba(185,146,79,0.1); }
+  .decision-choice:hover{ border-color:var(--gold); background:rgba(185,146,79,0.12); transform:translateX(3px); box-shadow:0 6px 16px rgba(0,0,0,0.3); }
   .decision-resolved{
-    background:var(--panel-light); border:1px solid var(--gold-soft); border-radius:2px; padding:16px 18px;
+    background:var(--panel-light); border:1px solid var(--gold-soft); border-radius:8px; padding:16px 18px;
   }
   .decision-resolved .dr-label{ font-size:11px; color:var(--gold); letter-spacing:.08em; margin-bottom:6px; }
   .decision-resolved .dr-chosen{ font-size:13.5px; color:var(--paper); margin-bottom:10px; }
@@ -413,12 +490,13 @@
   .map-svg-wrap svg{ width:100%; height:auto; display:block; }
   .map-modal-note{ margin-top:12px; font-size:11px; color:var(--ink-faint); letter-spacing:.04em; }
   .result-banner{ text-align:center; padding:34px 20px 24px; margin-bottom:8px; }
-  .result-banner .verdict{ font-family:'Shippori Mincho',serif; font-size:30px; font-weight:800; letter-spacing:.08em; }
-  .result-banner.correct .verdict{ color:#c7a95f; }
+  .result-banner .verdict{ font-family:'Shippori Mincho',serif; font-size:30px; font-weight:800; letter-spacing:.08em; animation:verdictIn .5s cubic-bezier(.2,.8,.3,1.1); }
+  @keyframes verdictIn{ from{ opacity:0; transform:translateY(10px) scale(.97); } to{ opacity:1; transform:translateY(0) scale(1); } }
+  .result-banner.correct .verdict{ color:#c7a95f; text-shadow:0 0 30px rgba(199,169,95,0.4); }
   .result-banner.wrong .verdict{ color:var(--ink-dim); }
   .result-banner .sub{ color:var(--ink-dim); font-size:13px; margin-top:8px; letter-spacing:.08em; }
 
-  .solution-section{ background:var(--panel); border:1px solid var(--line); border-radius:2px; padding:28px 30px; margin-bottom:20px; }
+  .solution-section{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:28px 30px; margin-bottom:20px; box-shadow:0 10px 28px rgba(0,0,0,0.25); }
   .solution-section h2{ font-family:'Shippori Mincho',serif; font-size:20px; color:var(--paper); margin:0 0 6px; border-bottom:1px solid var(--line); padding-bottom:14px; }
   .solution-section h2 .num{ color:var(--crimson-bright); margin-right:8px; }
   .solution-section p{ font-size:14.5px; color:var(--ink); margin:14px 0; }
@@ -2945,7 +3023,1000 @@ const episode8 = {
   ]
 };
 
-const episodes = [ episode1, episode2, episode3, episode4, episode5, episode6, episode7, episode8 ];
+const episode9 = {
+  id: "kiryudai-hospital",
+  chapter: 2,
+  cover: "covers/ep9.jpg",
+  number: 9,
+  title: "白い病棟の沈黙 —— 桐生台総合病院殺人事件",
+  subtitle: "桐生台総合病院〈第二章・第二話〉",
+  teaser: "勇退を控えた院長が、当直室で息絶えた。人事、治験、資金――机の上には、三つの「爆弾」。全員が、何かを隠している。",
+  status: "available",
+
+  prologueLede: "地域医療の中核を担う桐生台総合病院。深夜、勇退を控えた鷺宮院長が、当直室で倒れているのが発見された。デスクには、次期院長人事・治験データ・経営資金――三つの異なる書類が並んでいた。",
+  prologueParagraphs: [
+    "副院長、看護師長、若手医師、事務長、製薬会社の担当者、そして院長の娘――関わる誰もが、院長に何かを知られ、あるいは院長がいなくなれば何かを得る立場にある。水無瀬は、まだ違和感には気づいても、それを言葉にする確信が持てない。",
+    "あなたは名探偵として、交錯する六つの思惑をひとつずつ解きほぐし、本当の一本の糸を見つけ出さなければならない。"
+  ],
+  cast: [
+    { id:"shikatori", role:"副院長", name:"鹿取" },
+    { id:"hayama_ns", role:"看護師長", name:"葉山" },
+    { id:"kirishima", role:"若手医師", name:"霧島" },
+    { id:"kuwabara", role:"事務長", name:"桑原" },
+    { id:"himuro", role:"製薬会社担当", name:"氷室" },
+    { id:"haruka", role:"院長の娘", name:"鷺宮 遥" },
+  ],
+
+  locations: [
+    { id:"scene",     label:"当直室・遺体" },
+    { id:"teacup",    label:"湯呑み・給湯スペース" },
+    { id:"staff",     label:"関係者への聞き込み", unlockAfter:"g5" },
+    { id:"shikatori_loc", label:"鹿取への追及", unlockAfter:"g12" },
+    { id:"hayama_loc",    label:"葉山への追加聞き込み", unlockAfter:"g14" },
+    { id:"pharmacy",  label:"検査結果", unlockAfter:"g17" },
+    { id:"keydrawer", label:"鍵と引き出し", unlockAfter:"g19" },
+    { id:"kuwabara_loc", label:"桑原への追及", unlockAfter:"g21" },
+    { id:"cctv",      label:"防犯カメラ・通話記録", unlockAfter:"g23" },
+    { id:"clearing",  label:"氷室・遥の裏付け", unlockAfter:"g25" },
+  ],
+
+  investigationBudget: 21,
+  unlockThreshold: 19,
+
+  clues: [
+    { id:"g1", loc:"scene", title:"発見時の状況", sub:"院長当直室",
+      body:[
+        "深夜、巡回中の看護師が、椅子にもたれかかるように倒れている鷺宮院長を発見。争った形跡はなく、普段通り机に向かっていたような姿勢のままだった。",
+        "デスクには「次期院長人事について（内部限定）」の書類、治験データに関する資料、経営資金の出納記録――三つの異なる書類が、それぞれ別のファイルで置かれていた。"
+      ],
+      evidence:["現場に争った形跡はなかった","デスクに人事・治験・資金、三種類の書類が並んでいた"]
+    },
+    { id:"g2", loc:"scene", title:"鍵のかかった引き出し", sub:"鍵が見当たらない",
+      body:[
+        "デスクには鍵のかかった引き出しが一つ。院長が肌身離さず持っていたはずの鍵が、遺体の所持品からは見当たらなかった。"
+      ],
+      evidence:["鍵のかかった引き出しがあるが、鍵が見当たらない"]
+    },
+    { id:"g3", loc:"teacup", title:"薬湯の湯呑み検分", sub:"甘い香りと指紋",
+      body:[
+        "血圧管理のための漢方系の薬湯。ほぼ飲み干されているが、底にわずかな沈殿物。苦い香りに混じって、ごくかすかに甘い香りがした。",
+        "湯呑みの取っ手に、院長本人とは別の指紋がうっすらと残っていた。"
+      ],
+      evidence:["薬湯の湯呑みから、かすかに甘い香りがした","湯呑みの取っ手に、院長以外の指紋があった"]
+    },
+    { id:"g4", loc:"teacup", title:"薬湯の準備方法", sub:"葉山看護師長の担当",
+      body:[
+        "葉山：「院長先生の薬湯は、いつも私が当直室の給湯スペースで淹れて、お持ちしていました。」準備段階から、看護師長が日常的に関わっていたことが判明した。"
+      ],
+      evidence:["薬湯は、いつも葉山看護師長が給湯スペースで準備していた"]
+    },
+    { id:"g5", loc:"teacup", title:"給湯スペースの検分", sub:"パックの封の異常",
+      body:[
+        "薬湯のパックの箱の中に、封が不自然に緩んでいるものが一つ。棚には強心作用のある薬剤も保管されているが、鍵付きの薬品庫の中にあり、通常は看護師しかアクセスできない。"
+      ],
+      evidence:["薬湯のパックの一つだけ、封が不自然に緩んでいた"]
+    },
+    { id:"g6", loc:"teacup", title:"薬品庫のアクセス制限", sub:"念のための確認",
+      body:[
+        "薬品庫は施錠されており、基本的に看護師と医師のみがアクセスできる。事務長や院長の家族は、通常アクセスできない仕組みだった。"
+      ],
+      evidence:["薬品庫へのアクセスは、基本的に看護師と医師に限られていた"]
+    },
+    { id:"g7", loc:"staff", title:"鹿取・氷室への第一声", sub:"それぞれの立場",
+      body:[
+        "鹿取：「院長と少し、話をしに行きました。次期院長の件で、直接、意見を伝えたくて。」",
+        "氷室：「治験の件でしょうか。一部のデータに、解釈の相違があったのは事実です。それ以上は、弁護士を通していただければと。」"
+      ],
+      evidence:["鹿取：次期院長人事について院長と話しに行ったと証言","氷室：治験データの解釈の相違を認めつつ、それ以上は語らなかった"]
+    },
+    { id:"g8", loc:"staff", title:"霧島・桑原への第一声", sub:"それぞれの立場",
+      body:[
+        "霧島：「院長は、いろんなことを『清算』しようとしているように見えて。半年前のあの処置のことも、ずっと考えています。」",
+        "桑原：「経営は綱渡りの状態です。……不自然な資金の流れ、何を指しているのか、正直分かりかねます。」"
+      ],
+      evidence:["霧島：院長が『清算』をしようとしていると感じていたと証言","桑原：資金の流れについて防御的な態度を見せた"]
+    },
+    { id:"g9", loc:"staff", title:"遥への第一声", sub:"遺産と経営を巡る対立",
+      body:[
+        "遥：「父とは、正直、ここ数年ずっと対立していました。病院の経営方針のこと、遺産のこと……。」当夜は「東京の自宅にいた」と証言したが、この時点では裏付けがない。"
+      ],
+      evidence:["遥：父との対立を認めたが、当夜のアリバイに裏付けがなかった（この時点では）"]
+    },
+    { id:"g10", loc:"staff", title:"「経営コンサルティング」という言葉", sub:"水無瀬の小さな引っかかり",
+      body:[
+        "桑原の話の中に出てきた「経営コンサルティング」という言葉に、水無瀬がわずかに反応する。「……あの、前にもどこかで聞いた気がするんですけど」と言いかけるが、うまく思い出せず、そのまま聞き流してしまう。"
+      ],
+      evidence:["水無瀬：『経営コンサルティング』という言葉に、微かな既視感を覚えた（言語化はできず）"]
+    },
+    { id:"g11", loc:"staff", title:"霧島の医療過誤への不安", sub:"念のための深掘り",
+      body:[
+        "霧島：「院長は『墓場まで持っていく』と言ってくれました。でも最近、その約束が守られるのか、少し不安になることがありました。」"
+      ],
+      evidence:["霧島：院長との約束が守られるか不安を感じていたと証言"]
+    },
+    { id:"g12", loc:"staff", title:"湯呑みの指紋照合", sub:"入退室管理システムとの照合",
+      body:[
+        "セキュリティエリアの指紋登録記録と照合した結果、湯呑みの取っ手の指紋は、副院長・鹿取のものと一致する可能性が高いと判明した。"
+      ],
+      evidence:["湯呑みの取っ手の指紋は、副院長・鹿取のものと一致する可能性が高い"]
+    },
+    { id:"g13", loc:"shikatori_loc", title:"鹿取への追及：当夜の行動", sub:"「新しい薬湯を運んだ」",
+      body:[
+        "鹿取：「院長と話している途中、湯呑みが空になりそうだったので、給湯スペースまで新しいものを持っていった記憶があります。」自ら、当夜の関与を認めた。"
+      ],
+      evidence:["鹿取：当夜、自ら新しい薬湯を運んだことを認めた"]
+    },
+    { id:"g14", loc:"shikatori_loc", title:"給湯スペースの鍵貸出記録", sub:"事件3日前の40分間",
+      body:[
+        "貸し出し台帳に、事件の3日前、鹿取が給湯スペースの鍵を借りた記録。理由欄には「院内資料の確認のため」とあるが、返却まで約40分かかっていた。"
+      ],
+      evidence:["鹿取は事件3日前、給湯スペースの鍵を約40分借りていた"]
+    },
+    { id:"g15", loc:"shikatori_loc", title:"鹿取の弁明", sub:"「様子を窺っていただけです」",
+      body:[
+        "鹿取：「院長の様子が気になって、給湯スペースの方まで足を運びました。資料を探すふりをして、少し様子を窺っていただけです。院長に直接聞くべきか、一人で考え込んでいました。」"
+      ],
+      evidence:["鹿取：40分間は、院長の様子を気にして一人で考え込んでいたと弁明"]
+    },
+    { id:"g16", loc:"hayama_loc", title:"葉山の告白：縁戚関係", sub:"「院長の亡き妻の妹です」",
+      body:[
+        "葉山：「私は、院長先生の亡くなった奥様の、妹なんです。姉が亡くなってから、陰で院長先生を支えてきたつもりです。遥お嬢様とも、叔母と姪のような関係でした。」"
+      ],
+      evidence:["葉山：院長の亡き妻の妹であり、20年来の縁戚関係にあったと告白"]
+    },
+    { id:"g17", loc:"hayama_loc", title:"遺言書書き直しの話", sub:"葉山が把握していたこと",
+      body:[
+        "葉山：「最近、院長先生が、遺言書を書き直そうとしている、というお話を、それとなく伺っていました。遥お嬢様への相続の割合を、見直すおつもりだったようです。」"
+      ],
+      evidence:["葉山：院長が遺言書の書き直しを検討していたことを知っていたと証言"]
+    },
+    { id:"g18", loc:"hayama_loc", title:"給湯スペースへの日常的アクセス", sub:"記録に残らない立場",
+      body:[
+        "看護師長という立場上、葉山の給湯スペースへの出入りはそもそも記録されていない。日常的に、誰よりも自然にアクセスできる立場だった。"
+      ],
+      evidence:["葉山は看護師長として、給湯スペースに記録されない形で日常的にアクセスできた"]
+    },
+    { id:"g19", loc:"pharmacy", title:"検査結果：白い結晶の正体", sub:"ジギタリス系の成分",
+      body:[
+        "検査部：「結晶の正体は、強心配糖体――ジギタリス系の成分でした。院内の薬品庫にある薬剤と、成分が一致します。」",
+        "「甘い匂いは、風味を隠すための甘味成分によるコーティング。薬剤の扱いに慣れた人物の犯行だと考えられます。過剰摂取は心停止を引き起こし、今回の症状とも一致します。」"
+      ],
+      evidence:["白い結晶はジギタリス系の薬剤で、甘くコーティングされていた","検査部：薬剤の扱いに慣れた人物の犯行と推定"]
+    },
+    { id:"g20", loc:"keydrawer", title:"鍵の発見", sub:"ロッカーの上着のポケット",
+      body:[
+        "葉山：「当直の時は、私服に近い格好をされることもあったので……」院長専用のロッカーを確認すると、私物の上着の内ポケットに、小さなキーホルダーに繋がった鍵が見つかった。"
+      ],
+      evidence:["引き出しの鍵は、ロッカーの私物の上着から発見された"]
+    },
+    { id:"g21", loc:"keydrawer", title:"引き出しの中身", sub:"遺言書・治験メモ・質問リスト・謎の名刺",
+      body:[
+        "遺言書の下書き（遥への相続割合を減らし、病院への寄付を増やす内容）。治験データについて氷室の会社とのやり取りメモ（「このままでは公表せざるを得ない」）。桑原に問い詰めるための経営資金の質問リスト。",
+        "そして、聞き覚えのない会社の名刺。裏に「一度、内密にお話を」という走り書き。水無瀬は「どこかで見た気が……」と言いかけるが、思い出せずに流してしまう。"
+      ],
+      evidence:["引き出しに、遺言書下書き・治験メモ・資金の質問リストがあった","素性不明の会社の名刺が見つかった（裏に『一度、内密にお話を』の書き込み）"]
+    },
+    { id:"g22", loc:"kuwabara_loc", title:"桑原の告白：コンサル契約の実態", sub:"「脅されるような形で」",
+      body:[
+        "桑原：「外部の経営コンサルタントに、かなりの額を支払っていました。具体的にどんな改善提案があったのか、ほとんど記憶にありません。契約を切ろうとすると、『内部事情を把握している』と仄めかされて、怖くなったんです。」",
+        "契約書に記された社名を、水無瀬が見つめる。「……この名前、契約書の並び方……。もしかして……」と言いかけるが、また確信が持てずに口をつぐんでしまう。"
+      ],
+      evidence:["桑原：正体不明の経営コンサル会社と、脅されるような形で契約を継続させられていたと告白"],
+      silhouette: {
+        id: "frag2",
+        title: "経営コンサルティング契約書",
+        text: "事務長・桑原が、正体不明の会社と結んでいた高額なコンサル契約。具体的な改善提案はほとんど実行されず、契約を切ろうとすると『病院の内部事情を把握している』と仄めかされ、脅されるような形で継続させられていた。院長の遺品からは、同じ会社のものと思われる名刺も見つかっている。この事件の実行犯には、直接関わらなかった。"
+      }
+    },
+    { id:"g23", loc:"kuwabara_loc", title:"名刺の会社を調べる", sub:"実態の見えないペーパーカンパニー",
+      body:[
+        "登記上の所在地は小さな雑居ビルの一室。従業員数などの詳細はほとんど公開されておらず、設立から日が浅い、実態のよく分からない会社だった。代表者名も、他に情報が見つからない。",
+        "院長のもう一冊の手帳、事件当夜の欄に「23:00 面会（件の会社）」という書き込みがあった。"
+      ],
+      evidence:["名刺の会社は、実態の見えないペーパーカンパニーだった","院長の手帳に、事件当夜23時の面会予定が書き込まれていた"]
+    },
+    { id:"g24", loc:"cctv", title:"通話記録とスケジュール帳", sub:"面会はキャンセルされていた",
+      body:[
+        "警備員：外部からの来訪者記録は一切なし。院長の携帯電話には、事件当日18時頃、名刺の会社と思われる番号から2分ほどの着信。その直後、スケジュール帳の『23:00 面会』の文字に、薄い鉛筆の取り消し線があった。"
+      ],
+      evidence:["23時の面会は、事件当日18時の電話で直前にキャンセルされていたと判明"]
+    },
+    { id:"g25", loc:"cctv", title:"深夜の防犯カメラ映像", sub:"霧島の不審な行動",
+      body:[
+        "事件3日前の前日深夜、当直中だった霧島医師が、薬品庫と給湯スペースを行き来する姿が記録されていた。滞在時間は15分程度。",
+        "霧島に示すと「当直の巡回です」「たまたまです」とだけ答え、明らかな動揺を見せた。"
+      ],
+      evidence:["霧島は事件3日前の前日深夜、薬品庫と給湯スペースを訪れていた（本人は巡回だと主張）"]
+    },
+    { id:"g26", loc:"clearing", title:"氷室のアリバイ確認", sub:"除外",
+      body:[
+        "氷室：「本社で、遅くまで別件の資料作成をしていました。同僚も一緒でした。」後に確認すると、同僚の証言と一致し、事件当夜は病院に近づいていなかったことが裏付けられた。"
+      ],
+      evidence:["氷室のアリバイは同僚の証言と一致し、当夜病院にいなかったことが裏付けられた"]
+    },
+    { id:"g27", loc:"clearing", title:"遥のアリバイと専門知識の確認", sub:"除外",
+      body:[
+        "遥：「友人が泊まりに来ていました。プライベートなことだったので、今まで黙っていてすみません。」友人の証言により、当夜東京の自宅にいたことが裏付けられた。",
+        "薬剤の専門知識についても、「医療の専門知識はまったくありません」と証言。丁寧な薬剤の細工とは結びつきにくいと判断された。"
+      ],
+      evidence:["遥のアリバイは友人の証言で裏付けられ、医療の専門知識もないと確認された"]
+    },
+  ],
+
+  questions: {
+    q2: [
+      { id:"a", label:"薬品庫から持ち出したジギタリス系薬剤を、給湯スペースの薬湯パックに甘くコーティングして仕込んだ" },
+      { id:"b", label:"鹿取が、運んだ薬湯にその場で毒物を混入させた" },
+      { id:"c", label:"葉山が、日常的な薬湯の準備の中で毒物を混入させた" },
+      { id:"d", label:"謎の会社の人物が、23時の面会を装って直接手を下した" },
+    ],
+    q3: [
+      { id:"a", label:"半年前の医療過誤が公表され、医師免許を失うことへの恐れ" },
+      { id:"b", label:"次期院長人事への強い不満" },
+      { id:"c", label:"遺言書の書き換えによる相続減少への怒り" },
+      { id:"d", label:"経営資金の不正の発覚を防ぐため" },
+    ],
+  },
+  correct: { q1:["kirishima"], q2:"a", q3:"a" },
+
+  confrontation: {
+    culpritName: "霧島",
+    intro: "当直室、院長のデスクの前に立ち尽くす霧島と、天才探偵が向き合う。「霧島先生。鷺宮院長を殺害したのは、あなたですね。」",
+    rounds: [
+      {
+        rebuttal: "「……何を根拠に、そんなことをおっしゃるんですか。」",
+        hit: "霧島の声が、わずかに強張る。「……巡回中に立ち寄っただけです。それだけで疑われるのは心外です。」",
+        options: [
+          { id:"c1", label:"事件3日前の前日深夜、薬品庫と給湯スペースを訪れていた防犯カメラの映像", correct:true },
+          { id:"c2", label:"鹿取さんの、給湯スペースの鍵貸出記録", correct:false },
+          { id:"c3", label:"葉山さんが、院長の縁戚だったという事実", correct:false },
+          { id:"c4", label:"桑原さんが結んでいた、経営コンサル契約", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「巡回中に立ち寄っただけです。それだけで疑われるのは心外です。」",
+        hit: "霧島の顔から、余裕が消えていく。",
+        options: [
+          { id:"c5", label:"検査結果――ジギタリス系薬剤を甘くコーティングするという、薬剤の扱いに慣れた人物特有の手口", correct:true },
+          { id:"c6", label:"名刺の会社が、実態の見えないペーパーカンパニーだったという事実", correct:false },
+          { id:"c7", label:"遥さんの、友人の証言によるアリバイ", correct:false },
+          { id:"c8", label:"氷室さんの、同僚の証言によるアリバイ", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「……」霧島は答えない。だが、その沈黙こそが答えだった。",
+        hit: "霧島は、静かに目を伏せた。",
+        options: [
+          { id:"c9", label:"院長が『墓場まで持っていく』と約束していた、半年前の医療過誤――その発覚を恐れていたという、霧島さん自身の証言", correct:true },
+          { id:"c10", label:"湯呑みの取っ手に残っていた、鹿取さんの指紋", correct:false },
+          { id:"c11", label:"引き出しの鍵が、ロッカーの上着から見つかったという事実", correct:false },
+        ],
+      },
+    ],
+    finalConfession: [
+      "霧島は、深く息を吐いてから、静かに語り始めた。「半年前の処置は、僕のミスでした。判断を誤って、患者さんの容体を、一時的に悪化させてしまった。院長は、それを『自分の指示だった』と、庇ってくれました。」",
+      "「最近、院長が、色々なことを『清算』しようとしているのを感じていました。『墓場まで持っていく』という約束が、本当に守られるのか、怖くなったんです。もし公表されたら、僕は医師免許を失うかもしれない。」",
+      "「3日前の深夜、当直の巡回のふりをして、給湯スペースのパックに、薬品庫から持ち出した薬剤を仕込みました。甘い味でコーティングしたのは……院長に、少しでも苦しんでほしくなかったからです。矛盾してますよね。殺そうとしているのに。」",
+      "水無瀬が、震える声で尋ねた。「霧島先生……院長先生の名刺のこと、何かご存知でしたか?」霧島は怪訝な表情を見せる。「……いえ、聞いたことのない話です。院長が、そんな会社と接触していたなんて、僕は何も知りません。」水無瀬は、小さく肩を落としながら頷いた。「……そうですか。すみません、関係ない質問でした。」",
+    ],
+    gameOverText: "霧島は静かに首を振ると、それ以上何も語らなかった。「証拠が、まだ足りない気がします」とだけ言い残す。決定的な言葉を引き出せないまま、この対決は失敗に終わった——。",
+  },
+
+  solutionSections: [
+    { title:"第一部　三つの爆弾",
+      html:"院長のデスクには、次期院長人事・治験データ・経営資金――三つの異なる問題が同時に広げられていた。関わる誰もが、院長に何かを知られ、あるいは院長がいなくなれば何かを得る立場にあり、動機は幾重にも交錯していた。" },
+    { title:"第二部　機会と手口のねじれ",
+      html:"薬湯を運んだ副院長・鹿取、日常的にアクセスできた看護師長・葉山――「機会」だけを見れば疑わしい人物は複数いた。だが検査の結果、犯行には<strong>薬剤を甘くコーティングする専門的な手口</strong>が使われていたことが判明し、容疑は薬剤の扱いに慣れた人物へと絞られていった。" },
+    { title:"第三部　外部の影と、その限界",
+      html:"事務長・桑原を脅していた正体不明のコンサル会社。院長の遺品からは、同じ会社の名刺も見つかった。だが通話記録により、事件当夜の面会は直前にキャンセルされていたことが判明し、この会社が事件の直接の実行犯ではないことが確定した。" },
+    { title:"第四部　恐れが導いた凶行",
+      html:"最終的に浮かび上がったのは、半年前の医療過誤の発覚を恐れていた若手医師・霧島だった。深夜の防犯カメラ映像と、専門的な手口が、彼を指し示していた。" },
+  ],
+  evidenceTable: [
+    ["1","薬湯の甘い香りとパックの封の異常","毒物混入の経路の特定"],
+    ["2","検査結果（ジギタリス系＋甘いコーティング）","薬剤の扱いに慣れた人物という手口の特定"],
+    ["3","深夜の防犯カメラ映像（霧島の不審な行動）","犯行時期における実行者の裏付け"],
+    ["4","院長の手帳＋通話記録（23時面会のキャンセル）","外部会社が直接の実行犯ではないことの確定"],
+    ["5","氷室・遥のアリバイと専門知識の欠如","二人の容疑の解消"],
+    ["6","霧島自身の証言（医療過誤発覚への恐れ）","動機の確定"],
+  ],
+  epilogue: {
+    intro: "霧島医師の身柄が確保され、「桐生台総合病院殺人事件」は、その全貌を明らかにした。院長が広げていた三つの問題は、それぞれ別の形で、病院に残された者たちの手に委ねられることになった。",
+    characters: [
+      { who:"副院長・鹿取", text:"次期院長選考のやり直しを、正式に病院側へ申し入れた。「せめて、院長が最後に悩んでいたことに、正面から向き合いたい」と語った。" },
+      { who:"看護師長・葉山", text:"遥と改めて向き合い、遺言書の内容についても、二人で話し合う時間を持つことにした。" },
+      { who:"事務長・桑原", text:"正体不明のコンサル会社との契約を、正式に解除する手続きを進めている。「もっと早く、誰かに相談すればよかった」と悔やんでいた。" },
+      { who:"助手・水無瀬綾", text:"事件の後、少し浮かない顔をしていた。「あの名刺の会社……やっぱり、どこかで見た気がするんです」とだけ、天才探偵に呟いた。" },
+    ],
+    outro: "病院の廊下に、朝の光が差し込む。水無瀬は、まだ言葉にならない違和感を抱えたまま、次の事件へと歩き出す。"
+  },
+  redHerrings: [
+    "鹿取の3日前の40分間の滞在：不審な行動ではあったが、事件そのものへの関与はなかった。",
+    "葉山の縁戚関係と記録されないアクセス：動機・機会ともにあったが、実行犯ではなかった。",
+    "謎の会社との23時の面会予定：直前にキャンセルされており、事件そのものとは無関係だった。",
+    "氷室の治験データ不正、遥の相続問題：いずれも強い動機ではあったが、実行には至らなかった。",
+  ]
+};
+
+const episode10 = {
+  id: "grand-hotel-kikyo",
+  chapter: 2,
+  cover: "covers/ep10.jpg",
+  number: 10,
+  title: "満室の夜 —— グランドホテル桔梗殺人事件",
+  subtitle: "グランドホテル桔梗〈第二章・第三話〉",
+  teaser: "創業70周年の祝賀パーティーの夜、買収に反対していた専務が客室で息絶えた。満室の喧騒の裏で、主犯と共犯、二つの影が交差する。",
+  status: "available",
+
+  prologueLede: "都心の老舗高級ホテル「グランドホテル桔梗」。創業70周年を祝う記念パーティーの夜、外部資本による買収に最後まで強く反対していた専務・桔梗直之が、客室で倒れているのが発見された。",
+  prologueParagraphs: [
+    "満室の喧騒、大勢の招待客とスタッフが行き交う一夜。水無瀬は今回、初めて自分の判断で調べを進め、決定的な繋がりを自らの手で見つけ出す。",
+    "あなたは名探偵として、この事件の裏にいる二つの影――机上の駒として動いた者と、その駒を操った者――を、両方とも見極めなければならない。片方だけでは、真の決着にはならない。"
+  ],
+  cast: [
+    { id:"gamou", role:"買収コンサルタント", name:"蒲生" },
+    { id:"minamoto", role:"夜間支配人", name:"皆本" },
+    { id:"satomi", role:"総支配人", name:"里見" },
+    { id:"misaki", role:"桔梗家長女", name:"桔梗 美咲" },
+    { id:"tsukamoto", role:"宴会担当", name:"塚本" },
+    { id:"sawai", role:"フロント主任", name:"沢井" },
+  ],
+
+  locations: [
+    { id:"scene",    label:"客室・遺体" },
+    { id:"bottle",   label:"ウイスキーボトル" },
+    { id:"keylog",   label:"カードキーログ" },
+    { id:"cellar",   label:"セラーのアクセス記録", unlockAfter:"h6" },
+    { id:"staff",    label:"関係者への聞き込み", unlockAfter:"h7" },
+    { id:"gossip",   label:"互いの評判", unlockAfter:"h13" },
+    { id:"finance",  label:"皆本の財務調査", unlockAfter:"h14" },
+    { id:"minamoto_loc", label:"皆本への追及", unlockAfter:"h19" },
+    { id:"gamou_loc",    label:"蒲生への追及", unlockAfter:"h21" },
+    { id:"cctv",     label:"防犯カメラ・エレベーター記録", unlockAfter:"h22" },
+    { id:"fingerprint", label:"ボトルの指紋照合", unlockAfter:"h24" },
+  ],
+
+  investigationBudget: 20,
+  unlockThreshold: 18,
+
+  clues: [
+    { id:"h1", loc:"scene", title:"発見時の状況", sub:"専務のスイートルーム",
+      body:[
+        "パーティー終盤、専務の姿が見えないことを心配した美咲が客室を訪れ、倒れているのを発見。サイドテーブルのグラスが割れて床に散らばっていた。",
+        "死因は後頭部の打撲と、グラスに残っていたウイスキーからの薬物反応――両方の要素が絡んでいる可能性が高いという。"
+      ],
+      evidence:["専務は打撲と薬物、両方の要素が絡んだ状態で発見された","割れたグラスが床に散らばっていた"]
+    },
+    { id:"h2", loc:"scene", title:"デスクの書類", sub:"買収契約への強い拒否",
+      body:[
+        "買収契約に関する書類の束。専務自筆で「この条件では、絶対に飲めない」という強い書き込みが残されていた。"
+      ],
+      evidence:["専務は買収契約に、自筆で強い拒否の書き込みを残していた"]
+    },
+    { id:"h3", loc:"scene", title:"ドアの施錠状況", sub:"カードキー式オートロック",
+      body:[
+        "こじ開けられた形跡はなく、正規のカードキーで開錠された記録がシステムに残っている。"
+      ],
+      evidence:["客室のドアは、正規のカードキーで開錠された記録が残っていた"]
+    },
+    { id:"h4", loc:"bottle", title:"ウイスキーボトルの検分", sub:"栓の内側の針の跡",
+      body:[
+        "栓の内側に、針のような細いもので刺した跡。栓を開けずに中身へ薬物を注入した跡と考えられる。グラスの欠片からも同じ薬物反応が検出された。",
+        "液面の乾いた跡の付き方から、中身が一度大きく揺さぶられたか、注入時に圧力がかかった可能性が伺えた。"
+      ],
+      evidence:["ボトルの栓に、薬物を注入したとみられる針の跡があった","グラスの欠片からも同じ薬物反応が検出された"]
+    },
+    { id:"h5", loc:"bottle", title:"ボトルの入手経路", sub:"専務専用セラー",
+      body:[
+        "専務のウイスキーは私物で、パーティーの数日前から、ホテル内の貴賓用保管庫「専務専用セラー」に預けられていた。セラーは、ホテルの上級スタッフのみがアクセスできる。"
+      ],
+      evidence:["ボトルは、上級スタッフのみアクセス可能な専務専用セラーに保管されていた"]
+    },
+    { id:"h6", loc:"keylog", title:"カードキー開錠ログ", sub:"専務本人の後、もう一度",
+      body:[
+        "当夜、専務の部屋には、専務本人の後、もう一度だけ別のカードキーで開錠された記録がある。時刻はパーティー終盤、発見される少し前。",
+        "水無瀬が確認したところ、そのカードキーは、夜間支配人・皆本に割り当てられているものだった。"
+      ],
+      evidence:["専務本人の後、皆本のカードキーで一度だけ客室が開錠されていた"]
+    },
+    { id:"h7", loc:"cellar", title:"セラーのアクセス記録", sub:"複数人の出入り",
+      body:[
+        "3日前の深夜、皆本のICカードで約10分の入室（理由：在庫確認）。その前日の夕方には、里見のICカードで約5分の入室（理由：VIP対応の確認）。",
+        "パーティー当日の午後には、里見に伴われる形で蒲生がセラー前まで来た記録（蒲生自身のICカードでの入室記録はなし、理由：施設案内）。"
+      ],
+      evidence:["セラーには、皆本・里見それぞれの単独アクセス記録があった","蒲生は、里見の案内でセラー前まで来ていた（本人の入室記録はなし）"]
+    },
+    { id:"h8", loc:"staff", title:"皆本への第一声", sub:"「業務の一環です」",
+      body:[
+        "皆本：「セラーの在庫確認は、業務の一環です。」当夜、専務の部屋に入ったことについては「専務から、内線で『部屋に忘れ物を届けてほしい』と頼まれました。届け物を置いて、すぐに退室しました」と証言。"
+      ],
+      evidence:["皆本：専務からの内線を受けて部屋に届け物をしたと証言"]
+    },
+    { id:"h9", loc:"staff", title:"里見への第一声", sub:"「特に不審な点はなかった」",
+      body:[
+        "里見：「セラーの確認は、VIPのお客様への対応で、時々必要になります。」蒲生を案内したことについては「施設全体を見ていただく必要がありまして」と説明した。"
+      ],
+      evidence:["里見：セラーの確認は業務上必要だったと説明し、蒲生への案内も業務の一環だと証言"]
+    },
+    { id:"h10", loc:"staff", title:"蒲生への第一声", sub:"「平行線でしたが」",
+      body:[
+        "蒲生：「専務とは、買収条件について、何度も議論を重ねてきました。最後まで平行線でしたが……。」買収が成立すれば成功報酬があることは、あっさりと認めた。"
+      ],
+      evidence:["蒲生：専務との交渉が平行線だったことと、買収成立による成功報酬の存在を認めた"]
+    },
+    { id:"h11", loc:"staff", title:"美咲への第一声", sub:"パーティー中の行動",
+      body:[
+        "美咲：「私はむしろ、条件次第では買収を受け入れるべきだと思っていました。」当夜は「パーティー会場を、ずっと動き回っていました」と証言。"
+      ],
+      evidence:["美咲：買収には現実的な立場で、当夜はパーティー会場を動き回っていたと証言"]
+    },
+    { id:"h12", loc:"staff", title:"塚本の証言", sub:"皆本が慌てていた",
+      body:[
+        "塚本：「パーティーの途中、皆本さんが少し慌てた様子で、内線を受けているのを見かけました。あれが、専務からの連絡だったんでしょうか。」"
+      ],
+      evidence:["塚本：パーティー中、皆本が慌てた様子で内線を受けていたのを見たと証言"]
+    },
+    { id:"h13", loc:"staff", title:"沢井の証言", sub:"蒲生と里見がセラーフロアに",
+      body:[
+        "沢井：「蒲生様が、パーティーの前に、セラーのあるフロアを、里見支配人と一緒に歩かれているのを、エレベーター前でお見かけしました。」"
+      ],
+      evidence:["沢井：パーティー前、蒲生と里見がセラーのあるフロアを一緒に歩いているのを見たと証言"]
+    },
+    { id:"h14", loc:"gossip", title:"皆本についての評判", sub:"金銭的な苦労",
+      body:[
+        "里見：「最近、金銭的に苦労しているという噂を、小耳に挟んだことがあります。」塚本：「去年あたりから、なんだか元気がない時期がありましたね。」沢井：「支配人室に、見慣れない方が訪ねてくることが、何度かあった気がします。」"
+      ],
+      evidence:["皆本については、金銭的な苦労と、見慣れない訪問者があったという噂があった"]
+    },
+    { id:"h15", loc:"gossip", title:"里見についての評判", sub:"蒲生との親しさ",
+      body:[
+        "美咲：「最近、蒲生さんと、やけに親しげにされているのが、少し気になっていました。」塚本：「パーティーの準備中も、何度か二人だけで話し込んでいるのを見ました。」"
+      ],
+      evidence:["里見は、蒲生と親しげで頻繁に密談していたという証言が複数あった"]
+    },
+    { id:"h16", loc:"gossip", title:"蒲生についての評判", sub:"掴みどころのなさ",
+      body:[
+        "美咲：「蒲生さんは、とにかく買収を成立させることしか考えていない人です。」塚本：「蒲生様が、里見支配人以外にも、皆本さんと二人で話しているのを、一度だけ見かけたことがあります。」"
+      ],
+      evidence:["蒲生と皆本が二人だけで話しているのを見たという証言があった"]
+    },
+    { id:"h17", loc:"gossip", title:"美咲についての評判", sub:"現実的な立場",
+      body:[
+        "皆本：「美咲様は、専務とは違って、買収に対して現実的なお考えをお持ちのようでした。」里見：「本当に多くのお客様にご挨拶されていました、休む間もなく。」"
+      ],
+      evidence:["美咲は買収に現実的な立場で、当夜は多忙にしていたという証言が複数あった"]
+    },
+    { id:"h18", loc:"finance", title:"皆本の借金と完済", sub:"経理部門への確認",
+      body:[
+        "経理担当：「二ヶ月ほど前まで、給与の差し押さえに関する相談を受けていました。かなりの額の借金を抱えていらしたようです。」その借金は、二ヶ月前に突然完済されていた。"
+      ],
+      evidence:["皆本はかなりの借金を抱えていたが、二ヶ月前に突然完済されていた"]
+    },
+    { id:"h19", loc:"finance", title:"水無瀬による振込経路の特定", sub:"クレセント・アドバイザリー",
+      body:[
+        "水無瀬が自ら振込記録を辿り、皆本の借金が「クレセント・アドバイザリー」という会社からの『経営相談料の前払い』名目の振込で完済されていたことを突き止めた。",
+        "この会社は、蒲生が所属するコンサルティング会社と同じ住所に登記されていた。水無瀬：「蒲生さんの会社が名前を変えて、皆本さんに直接お金を渡した、ということだと思います。」"
+      ],
+      evidence:["皆本の借金完済は、蒲生の会社と同一住所の別会社からの振込によるものだった"],
+      silhouette: {
+        id: "frag3",
+        title: "クレセント・アドバイザリー",
+        text: "皆本の借金を肩代わりしていた『経営相談料の前払い』名目の振込元。登記上は蒲生の会社と同一住所――名前を変えただけの、実体の薄いペーパーカンパニーだった。水無瀬は、自らの判断でここまで辿り着いた。名付けようのない違和感は、少しずつ輪郭を帯び始めている。"
+      }
+    },
+    { id:"h20", loc:"minamoto_loc", title:"皆本の告白：弱みと依頼", sub:"「断れば、ばらすと仄めかされて」",
+      body:[
+        "皆本：「借金は、蒲生さんの会社から出た資金で完済されました。見返りに、専務のスケジュールや、セラーの管理体制について、それとなく情報を提供させられていました。断れば、借金の件をばらすと仄めかされて。」",
+        "「事件の夜、蒲生さんから『専務の部屋に、書類を届けてほしい』と頼まれました。マスターキーを使うことも、事前に指示されていました。」"
+      ],
+      evidence:["皆本：蒲生の会社からの資金提供と引き換えに、情報提供を強いられていたと告白","皆本：当夜の部屋への訪問は、蒲生からの指示だったと証言"]
+    },
+    { id:"h21", loc:"minamoto_loc", title:"皆本の証言：専務は生きていた", sub:"「僕がやったのは、それだけです」",
+      body:[
+        "皆本：「書類を届けて、すぐに部屋を出ました。専務は、その時はまだ、椅子に座って生きていらっしゃいました。ウイスキーのことは、僕は何も知りません。」",
+        "セラーでの「在庫確認」についても、「その時、ボトルに何か細工をしたかと聞かれても、正直、記憶にありません」と証言した。"
+      ],
+      evidence:["皆本：訪問時、専務はまだ生存していたと証言","皆本：ウイスキーへの細工については関知していないと証言"]
+    },
+    { id:"h22", loc:"gamou_loc", title:"蒲生への追及：情報提供は認めるが", sub:"「殺人となると、話は別です」",
+      body:[
+        "蒲生：「彼には、色々と、ホテル内部の情報提供という形で、ご協力いただいていました。それ自体は、違法なことではないはずです。」ウイスキーへの細工については明確に否定した。",
+        "当夜のアリバイについては「パーティー会場に、ずっとおりました。多くの招待客の方々と、名刺交換もしています」と主張。複数の招待客の証言と一致するが、セラーのあるフロアまでは短時間の離脱が可能な距離だった。"
+      ],
+      evidence:["蒲生：皆本への情報提供の依頼は認めたが、ウイスキーへの関与は否定した","蒲生のアリバイは会場での歓談が中心だが、セラーへの短時間の離脱は可能な距離だった"]
+    },
+    { id:"h23", loc:"cctv", title:"パーティー中の8分間の空白", sub:"カメラの不自然な停止",
+      body:[
+        "パーティー開始から40分ほど経った時間帯、蒲生の姿が約8分間、どのカメラにも映らない空白があった。セラーのあるフロアへ繋がる階段付近のカメラは、該当時間帯「メンテナンス中」の表示で映像が記録されていなかった。",
+        "里見：「メンテナンス……？ そんな予定は、聞いていませんが。」"
+      ],
+      evidence:["蒲生の姿が約8分間、どのカメラにも映らない空白があった","セラーフロアへの階段のカメラが、同じ時間帯だけ『メンテナンス中』になっていた"]
+    },
+    { id:"h24", loc:"cctv", title:"エレベーターの移動記録", sub:"誰が乗ったかは特定不能",
+      body:[
+        "エレベーターの階数ログを確認すると、該当の8分間の空白の中で、セラーのあるフロアへの移動が一件記録されていた。ただし、誰が乗ったかまでは映像がないため特定できなかった。"
+      ],
+      evidence:["8分間の空白の中に、セラーのあるフロアへのエレベーター移動が一件記録されていた"]
+    },
+    { id:"h25", loc:"fingerprint", title:"ボトル栓の指紋照合", sub:"決め手にはならず",
+      body:[
+        "栓の部分から、専務の指紋に重なる形で、もう一種類の指紋が薄く検出されたが、皆本の指紋とは一致しなかった。蒲生については、指紋の登録記録自体がなく、正式な照合ができなかった。",
+        "鑑識：「劣化が進んでいて、断定的な照合が難しい状態です。手袋を使用していた可能性も考えられます。」"
+      ],
+      evidence:["ボトル栓の指紋は皆本のものとは一致しなかった","蒲生の指紋は、登録記録がなく照合自体ができなかった"]
+    },
+    { id:"h26", loc:"fingerprint", title:"グラスの欠片の指紋", sub:"念のための確認",
+      body:[
+        "割れたグラスの欠片からは、専務本人の指紋のみが検出された。決定的な手がかりにはならなかった。"
+      ],
+      evidence:["グラスの欠片からは、専務本人の指紋のみが検出された"]
+    },
+  ],
+
+  questions: {
+    q2: [
+      { id:"a", label:"皆本に部屋への出入りとセラーへの接近の機会を作らせ、蒲生自身がウイスキーに薬物を注入した" },
+      { id:"b", label:"皆本が単独で、届け物のふりをして直接専務を殴打した" },
+      { id:"c", label:"里見が、セラー管理者としてボトルに直接細工した" },
+      { id:"d", label:"美咲が、パーティーの隙を突いて客室に忍び込み実行した" },
+    ],
+    q3: [
+      { id:"a", label:"買収を強く拒む専務を排除し、買収を成立させ成功報酬を得るため" },
+      { id:"b", label:"専務との個人的な因縁による恨み" },
+      { id:"c", label:"ホテルの経営権を巡る里見との対立" },
+      { id:"d", label:"美咲との関係のもつれ" },
+    ],
+  },
+  correct: { q1:["gamou","minamoto"], q2:"a", q3:"a" },
+  correctPartial: ["minamoto"],
+  resultVerdict: {
+    title: "事件は解決した —— だが、影はまだ消えていない",
+    sub: "主犯・共犯、両者ともに指摘は的中した。だが、事件は、この後もう一波乱を残していた。"
+  },
+
+  confrontation: {
+    culpritName: "蒲生",
+    intro: "証拠を携え、天才探偵は蒲生と向き合う。「蒲生さん。桔梗直之専務を殺害したのは、あなたですね。」蒲生は、余裕のある笑みを崩さなかった。",
+    rounds: [
+      {
+        rebuttal: "「証拠もないのに、随分な言いがかりですね。情報提供を頼んだことは認めますが、殺人となると話は別です。」",
+        hit: "蒲生の笑みが、わずかに硬くなる。「……その資金の流れがあったからといって、それが殺人の証拠にはならないでしょう。」",
+        options: [
+          { id:"c1", label:"皆本さんの借金完済――『クレセント・アドバイザリー』が、あなたの会社と同一住所に登記されていたという事実", correct:true },
+          { id:"c2", label:"里見さんが、あなたと親しげにしていたという複数の証言", correct:false },
+          { id:"c3", label:"美咲さんの、パーティー中のアリバイ", correct:false },
+          { id:"c4", label:"塚本さんが見た、皆本さんが内線で慌てていたという証言", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「その資金の流れがあったからといって、それが殺人の証拠にはならないでしょう。」",
+        hit: "蒲生の表情に、初めて陰りが見える。",
+        options: [
+          { id:"c5", label:"パーティー中の8分間、あなたの姿がどのカメラにも映らず、セラーフロアのカメラだけが『メンテナンス中』になっていたという事実", correct:true },
+          { id:"c6", label:"ボトルの栓の指紋（照合不能で決め手にならない）", correct:false },
+          { id:"c7", label:"里見さんのセラーへの単独アクセス記録", correct:false },
+          { id:"c8", label:"グラスの欠片から検出された、専務本人の指紋", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「……」蒲生は答えない。だが、笑みはもう、完全に消えていた。",
+        hit: "蒲生は、静かに肩を落とした。",
+        options: [
+          { id:"c9", label:"皆本さん自身の証言――あなたに指示されて専務の部屋に入り、セラーの『在庫確認』も頼まれていたという告白", correct:true },
+          { id:"c10", label:"美咲さんの、買収についての証言", correct:false },
+          { id:"c11", label:"沢井さんが見た、あなたと里見さんがセラーフロアを歩いていたという目撃証言", correct:false },
+        ],
+      },
+    ],
+    finalConfession: [
+      "蒲生は、長い沈黙の後、諦めたように息を吐いた。「……お見事です。ここまで辿り着かれるとは、正直、思っていませんでした。」",
+      "「専務は、最後まで頑固でした。買収の条件を、一切譲らない。このままでは、私の会社にとっても、大きな損失になるところでした。」",
+      "「皆本くんの借金は、渡りに船でした。彼を通じて、専務のスケジュールとセラーの管理体制を把握し、パーティーの喧騒に紛れて、セラーで一人になる時間を作りました。ボトルへの注入は、その時に。」",
+      "「皆本くんには、本当に情報提供だけを頼んだつもりでした。……いえ、正直に言えば、そう思い込みたかっただけかもしれません。」蒲生は、静かに目を伏せた。",
+    ],
+    gameOverText: "蒲生は静かに笑みを浮かべ直すと、それ以上何も語らなかった。「証拠が、まだ足りないのではありませんか」とだけ言い残す。決定的な言葉を引き出せないまま、この対決は失敗に終わった——。",
+  },
+
+  partialConfrontation: {
+    culpritName: "皆本",
+    intro: "証拠を携え、天才探偵は皆本と向き合う。「皆本さん。専務の部屋に、指示されて出入りしていましたね。」皆本は、もう隠す気力もないように、静かに頷いた。",
+    rounds: [
+      {
+        rebuttal: "「……もう、隠すことはありません。ですが、正式に、何を根拠にとおっしゃるのか、聞かせていただけますか。」",
+        hit: "皆本は、静かに頷く。",
+        options: [
+          { id:"c1", label:"二ヶ月前、正体不明の会社からの振込で完済されていた、あなたの借金の記録", correct:true },
+          { id:"c2", label:"ボトルの栓に残っていた、照合不能の指紋", correct:false },
+          { id:"c3", label:"沢井さんが見た、蒲生さんと里見さんの様子", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「蒲生さんに、脅されるようにして……仕方なかったんです。」",
+        hit: "皆本は、深く俯いた。もう、それ以上の言い訳はなかった。",
+        options: [
+          { id:"c4", label:"当夜、専務の部屋を最後に開錠したのが、あなたのカードキーだったという記録", correct:true },
+          { id:"c5", label:"蒲生さんが会場で見せていた、当夜のアリバイ", correct:false },
+          { id:"c6", label:"里見さんのセラーへの単独アクセス記録", correct:false },
+        ],
+      },
+    ],
+    finalConfession: [
+      "皆本は、深く頭を垂れた。「全部、お話しした通りです。借金を肩代わりしてもらう代わりに、情報を渡し、当夜は指示された通り、部屋に届け物をしました。……専務は、その時、まだ生きていらっしゃいました。」",
+      "「ウイスキーに何があったのか、僕は本当に知りません。……蒲生さんが、今どこにいるのかも。」",
+      "皆本の身柄は確保された。だが、蒲生を追及するための物証は、最後まで「状況証拠」の域を出なかった。正式な立件には至らず、任意の聴取の後、蒲生は静かに姿を消していった。",
+    ],
+    gameOverText: "皆本は、力なく首を振ると、それ以上何も語らなくなった。決定的な言葉を引き出せないまま、この対決は失敗に終わった——。",
+  },
+
+  solutionSections: [
+    { title:"第一部　二つの機会",
+      html:"専務のウイスキーには、専用セラーに保管されていた間に、針で薬物が注入されていた。当夜、専務の部屋を最後に訪れたのは、夜間支配人・皆本のカードキーだった。機会は、この二つの場所に集中していた。" },
+    { title:"第二部　操られた駒",
+      html:"皆本は、正体不明の会社からの資金提供で借金を完済されていた。水無瀬の調査により、この会社が買収コンサルタント・蒲生の会社と同一住所に登記されていることが判明し、皆本が弱みを握られ、情報提供と当夜の訪問を強いられていたことが明らかになった。" },
+    { title:"第三部　状況証拠の壁",
+      html:"パーティー中、蒲生の姿が8分間、どのカメラにも映らない空白があり、同じ時間帯、セラーフロアのカメラだけが不自然に『メンテナンス中』になっていた。だが、蒲生自身がボトルに触れた直接の物証は、指紋照合を含め、最後まで見つからなかった。" },
+    { title:"第四部　決着",
+      html:"皆本は、蒲生の指示のもとで動いていた「機会の提供者」に過ぎず、蒲生こそが専務を排除しようとした真の主犯だった。状況証拠を積み重ね、両者を結びつけられるかどうかが、この事件の帰趨を分けた。" },
+  ],
+  evidenceTable: [
+    ["1","ボトルの栓の針の跡＋専用セラーでの保管","毒物混入の経路と機会の特定"],
+    ["2","当夜の開錠ログ（皆本のカードキー）","専務の部屋への最後の訪問者の特定"],
+    ["3","皆本の借金完済＋振込元が蒲生の会社と同住所","蒲生が皆本を操っていたことの物証"],
+    ["4","皆本自身の告白（情報提供の強要、当夜の指示）","蒲生の関与を裏付ける証言"],
+    ["5","パーティー中の8分間の空白＋カメラの不自然な停止","蒲生の犯行機会を示す状況証拠"],
+  ],
+  epilogue: {
+    intro: "蒲生と皆本、両者の身柄が確保され、「グランドホテル桔梗殺人事件」は、いったんその全貌を明らかにした。買収話は白紙に戻り、ホテルは創業家の手に残ることになった。",
+    characters: [
+      { who:"桔梗美咲", text:"兄の遺志を継ぎ、ホテルの経営を引き継ぐ決意をした。「買収そのものが悪かったわけじゃない。ただ、あんな形で兄を失うなんて」と、静かに涙を拭った。" },
+      { who:"夜間支配人・皆本", text:"捜査への全面的な協力が認められ、情状酌量の余地があるとされた。「もっと早く、誰かに相談すればよかった」と繰り返し悔やんでいた。" },
+      { who:"助手・水無瀬綾", text:"自分の力で見つけ出した繋がりが、事件解決の決め手になったことに、静かな達成感を滲ませていた。「天才探偵さんに、名前で呼んでもらえたこと……忘れません」と笑った。" },
+    ],
+    outro: "満室だったホテルのロビーに、朝の静けさが戻る。天才探偵と水無瀬は、次の事件へと向かう足取りを、少しだけ確かなものにしていた。……だが、事件は、それで終わらなかった。護送の途中、蒲生の身柄はごく短い隙をついて消えた。護送車の記録には、不可解な通信障害があったとだけ記されている。捜査は振り出しに戻り、事件は再び、追跡すべき影を一つ抱えることになった。"
+  },
+  redHerrings: [
+    "里見と蒲生の親密な様子：複数の証言があったが、里見自身が事件に直接関与した証拠はなかった。",
+    "美咲の買収受容の立場：動機として疑われたが、強固なアリバイにより除外された。",
+    "グラスの欠片の指紋：専務本人のもののみで、決定的な手がかりにはならなかった。",
+  ],
+
+  partialOutcome: {
+    resultVerdict: {
+      title: "共犯は確保、主犯は消えた",
+      sub: "証拠は皆本を捉えた。だが、蒲生を止めるには、まだ足りなかった。"
+    },
+    solutionSections: [
+      { title:"第一部　二つの機会",
+        html:"専務のウイスキーには、専用セラーに保管されていた間に、針で薬物が注入されていた。当夜、専務の部屋を最後に訪れたのは、夜間支配人・皆本のカードキーだった。" },
+      { title:"第二部　操られた駒",
+        html:"皆本は、正体不明の会社からの資金提供で借金を完済されており、その資金の出所は、買収コンサルタント・蒲生の会社と同一住所だった。皆本は、弱みを握られ、情報提供と当夜の訪問を強いられていたと証言した。" },
+      { title:"第三部　届かなかった追及",
+        html:"パーティー中の8分間の空白、不自然に停止したセラーフロアのカメラ――状況証拠は積み重なっていた。だが、蒲生自身がボトルに触れたことを示す直接の物証はついに見つからず、<strong>正式な立件には至らなかった</strong>。" },
+    ],
+    evidenceTable: [
+      ["1","ボトルの栓の針の跡＋専用セラーでの保管","毒物混入の経路と機会の特定"],
+      ["2","当夜の開錠ログ（皆本のカードキー）","皆本の直接的な関与の裏付け"],
+      ["3","皆本の借金完済＋振込元が蒲生の会社と同住所","蒲生への疑いの根拠（状況証拠）"],
+      ["4","パーティー中の8分間の空白","蒲生の犯行機会を示す状況証拠（決定打には至らず）"],
+    ],
+    escapeNote: {
+      title: "主犯、逃亡 —— 取り逃がしエンド",
+      paragraphs: [
+        "皆本の身柄は確保され、事件の骨格はほぼ解明された。だが、蒲生に対する追及は、状況証拠の域を出なかった。",
+        "任意の聴取が続く中、蒲生は「証拠がない以上、これ以上お話しすることはありません」とだけ告げ、静かにホテルを後にした。数日後、彼の会社は突然、業務を停止し、本人の消息も分からなくなった。",
+        "推理は、恐らく正しかった。だが、それを証明しきれなかった代償は、小さくない。"
+      ]
+    },
+    epilogue: {
+      intro: "皆本の証言により、事件の全貌はほぼ明らかになった。だが、真の主犯を取り逃がしたという事実が、この事件に苦い後味を残すことになった。",
+      characters: [
+        { who:"桔梗美咲", text:"「兄を追い詰めた張本人が、野放しになっているなんて」と、悔しさを滲ませながらも、ホテルの再建に力を注ぐことを決めた。" },
+        { who:"夜間支配人・皆本", text:"全面的に捜査に協力し、情状酌量の余地があるとされた。「あの人が今どこにいるのか、僕も知りたいです」とだけ、力なく呟いた。" },
+        { who:"助手・水無瀬綾", text:"「もっと強く、証拠が足りないなりにも、はっきり言うべきだったんじゃないか」と、悔しさを抱えていた。天才探偵は、それを否定も肯定もせず、ただ静かに隣にいた。" },
+      ],
+      outro: "満室だったホテルのロビーに、朝の静けさが戻る。だが、消えた蒲生のその後を知る者は、この場には誰もいなかった。"
+    }
+  }
+};
+
+
+const episode11 = {
+  id: "gran-regalo",
+  chapter: 2,
+  cover: "covers/ep11.jpg",
+  number: 11,
+  title: "偽名の男 —— 会員制ラウンジ「グラン・レガーロ」殺人事件",
+  subtitle: "会員制ラウンジ「グラン・レガーロ」〈第二章・第四話〉",
+  teaser: "偽名を使い、逃亡の準備を進めていた男が、個室で息絶えた。当初は殺人と思われたが、調べるほどに、事件は違う顔を見せ始める。",
+  status: "available",
+
+  prologueLede: "都心の会員制ラウンジ「グラン・レガーロ」。偽名で入会していた一人の男が、個室で息絶えているのが発見された。身元を確認すると――それは、グランドホテル桔梗の一件で、証拠不十分のまま姿を消していた買収コンサルタント・蒲生だった。",
+  prologueParagraphs: [
+    "水無瀬にとって、これは重い再会だった。取り逃がした相手が、まさかこんな形で戻ってくるとは。彼女は今回、逃したことへの悔しさを引きずったまま、捜査に加わることになる。",
+    "あなたは名探偵として、逃亡者の死の真相を追う。だが今回、事件は捜査を進めるほどに、その輪郭を変えていく。これは、殺人事件だったのか――それとも。"
+  ],
+  cast: [
+    { id:"daidoji", role:"桔梗家の運転手兼ボディーガード", name:"大道寺" },
+    { id:"kisaragi", role:"ラウンジ支配人", name:"如月" },
+    { id:"kagurazaka", role:"謎めいた会員", name:"神楽坂" },
+    { id:"endo", role:"バーテンダー", name:"遠藤" },
+    { id:"kubota", role:"同業のコンサルタント", name:"久保田" },
+  ],
+
+  locations: [
+    { id:"scene",      label:"個室・遺体" },
+    { id:"belongings", label:"蒲生の遺留品" },
+    { id:"staff",      label:"ラウンジ関係者", unlockAfter:"b4" },
+    { id:"kagurazaka_loc", label:"神楽坂を追う", unlockAfter:"st4" },
+    { id:"daidoji_loc", label:"大道寺への接触", unlockAfter:"k2" },
+    { id:"phonecheck", label:"バーナーフォンの記録", unlockAfter:"d3" },
+    { id:"cctv",       label:"防犯カメラ", unlockAfter:"p2" },
+    { id:"final",      label:"如月の所在", unlockAfter:"c3" },
+  ],
+
+  investigationBudget: 18,
+  unlockThreshold: 16,
+
+  clues: [
+    { id:"s1", loc:"scene", title:"発見時の状況", sub:"ラウンジの個室",
+      body:[
+        "会員制ラウンジの奥まった個室で、男が息絶えているのが発見された。カーテンの紐が、首に巻きついた状態だった。",
+        "会員登録は偽名――「涌井」という名前で、数週間前から利用していた記録が残っている。"
+      ],
+      evidence:["被害者は偽名でラウンジに会員登録していた","カーテンの紐が首に巻きついた状態で発見された"]
+    },
+    { id:"s2", loc:"scene", title:"身元の確認", sub:"変装した蒲生",
+      body:[
+        "髪型を変え、伊達眼鏡をかけていたが、指紋照合の結果、被害者はグランドホテル桔梗の一件で姿を消していた買収コンサルタント・蒲生本人だと確認された。"
+      ],
+      evidence:["被害者は、以前取り逃がした買収コンサルタント・蒲生本人だった"]
+    },
+    { id:"s3", loc:"scene", title:"検視の所見", sub:"「これは、他殺とは断定できません」",
+      body:[
+        "駆けつけた検視医：「索条痕の入り方、体勢……第三者に絞められたにしては、不自然な点が多いんです。抵抗した形跡もない。これは、**自らの体重を使って首を絞めた、自死の可能性が高い**と思います。」",
+        "水無瀬が、言葉を失う。「殺人、じゃないんですか……?」"
+      ],
+      evidence:["検視医：外部からの強い抵抗の跡がなく、自死の可能性が高いと所見"]
+    },
+    { id:"b1", loc:"belongings", title:"偽名の会員証と変装道具", sub:"逃亡生活の跡",
+      body:[
+        "偽の身分証、伊達眼鏡、髪染めの跡が残るポーチ。数週間、正体を隠しながら潜伏生活を送っていたことが伺える。"
+      ],
+      evidence:["蒲生は偽名と変装で、数週間潜伏生活を送っていた"]
+    },
+    { id:"b2", loc:"belongings", title:"逃亡準備の証拠", sub:"航空券と現金",
+      body:[
+        "鞄の中に、翌週出発予定の海外行き航空券と、多額の現金。国外への逃亡を計画していたことが分かる。ただし航空券は、まだ使われていない状態だった。"
+      ],
+      evidence:["蒲生は翌週、海外への逃亡を計画していた（実行前だった）"]
+    },
+    { id:"b3", loc:"belongings", title:"隠し持っていたメモ帳", sub:"「奴らに消される前に」",
+      body:[
+        "手帳の最後のページに、震えるような筆跡で「奴らに消される前に、遠くへ行かなければ」「あの件は、もう終わらせたはずだった」という走り書きが残されていた。",
+        "さらにその下、当日の日付の欄には、ひときわ乱れた字で「もう、逃げ切れない」とだけ書かれている。"
+      ],
+      evidence:["蒲生は手帳に『奴らに消される前に』という恐怖の走り書きを残していた","事件当日の欄に『もう、逃げ切れない』という乱れた書き込みがあった"]
+    },
+    { id:"b4", loc:"belongings", title:"バーナーフォンの発見", sub:"使い捨て携帯電話",
+      body:[
+        "鞄の底から、契約者情報の登録されていない、使い捨てのバーナーフォンが見つかった。中身の確認には、追って通信記録の照会が必要になりそうだ。"
+      ],
+      evidence:["蒲生は契約者情報のない使い捨て携帯を所持していた"]
+    },
+    { id:"st1", loc:"staff", title:"支配人・如月への聞き込み", sub:"「素性は存じ上げませんでした」",
+      body:[
+        "如月：「『涌井様』としてご入会いただいておりました。会員審査は、紹介制で比較的緩やかなものですので……素性までは、正直、存じ上げませんでした。」落ち着いた、隙のない受け答えだった。"
+      ],
+      evidence:["如月：被害者の本当の素性は知らなかったと証言"]
+    },
+    { id:"st2", loc:"staff", title:"バーテンダー・遠藤の目撃証言", sub:"言い争う様子",
+      body:[
+        "遠藤：「『涌井様』が、当夜、どなたかと言い争うような声を上げているのを、個室の近くで耳にしました。相手の姿までは、はっきり見ていません。」"
+      ],
+      evidence:["遠藤：被害者が当夜、誰かと言い争っているのを聞いたと証言"]
+    },
+    { id:"st3", loc:"staff", title:"久保田への聞き込み", sub:"同業者としての因縁",
+      body:[
+        "久保田：「蒲生とは、何度か商談で競合したことがあります。良い感情は持っていませんでしたが……まさか、こんな場所で会うとは思いませんでした。」当夜はラウンジの別室で接待中だったと証言。"
+      ],
+      evidence:["久保田：蒲生とは商売敵だったと証言（当夜は別室で接待中とのアリバイあり）"]
+    },
+    { id:"st4", loc:"staff", title:"神楽坂という会員", sub:"どこか怪しい態度",
+      body:[
+        "神楽坂は、質問にどこかはぐらかすような態度を見せる。「涌井さん? ……さあ、あまり存じ上げませんね。」水無瀬が、その態度に強く反応する。"
+      ],
+      evidence:["神楽坂：被害者について質問されると、はぐらかすような態度を見せた"]
+    },
+    { id:"st5", loc:"staff", title:"久保田のアリバイ確認", sub:"念のため",
+      body:[
+        "接待していた取引先の証言により、久保田が当夜ずっと別室にいたことが裏付けられた。"
+      ],
+      evidence:["久保田のアリバイは、取引先の証言で裏付けられた"]
+    },
+    { id:"st6", loc:"staff", title:"如月の経営状況についての噂", sub:"念のため",
+      body:[
+        "ラウンジの経営が一時期苦しかったという噂があったが、確認すると、すでに数ヶ月前に改善しており、事件とは時期的に無関係だと分かった。"
+      ],
+      evidence:["ラウンジの経営難の噂は、事件とは時期的に無関係だった"]
+    },
+    { id:"k1", loc:"kagurazaka_loc", type:"decision",
+      prompt:"水無瀬が、神楽坂の態度を強く怪しみ、彼を集中的に追及すべきだと主張しています。",
+      hint:"水無瀬は、灯影会の影を、どうしても見つけたがっているようです。",
+      choices:[
+        { label:"水無瀬の意見も踏まえつつ、フラットに他の可能性も探る", kind:"safe",
+          resultText:"水無瀬は少し不満そうだったが、捜査の幅は保たれた。" },
+        { label:"水無瀬を信じて、神楽坂の追及に時間を集中させる", kind:"costly", penalty:4,
+          resultText:"神楽坂への追及に多くの時間を費やしたが、これといった決定的な材料は出てこなかった。貴重な時間が、静かに失われていった。" },
+      ],
+    },
+    { id:"k2", loc:"kagurazaka_loc", title:"神楽坂の正体", sub:"ただの緊張しがちな会員",
+      body:[
+        "神楽坂の経歴を調べると、事件性のある繋がりは何も見つからなかった。「不倫を噂されたくなくて、つい言葉を濁してしまって……」と、まったく別の事情による態度だったことが判明する。",
+        "水無瀬：「……すみません。灯影会の影を、どうしても見つけたくて、少し先走ってしまいました。」"
+      ],
+      evidence:["神楽坂の不審な態度は、事件とは無関係な個人的事情によるものだった"]
+    },
+    { id:"d1", loc:"daidoji_loc", title:"大道寺への聞き込み", sub:"桔梗家の運転手兼ボディーガード",
+      body:[
+        "大道寺：「美咲お嬢様の護衛で、この街に来ておりました。ラウンジに立ち寄ったのは、偶然です。」物腰は丁寧だが、どこか張り詰めた雰囲気がある。"
+      ],
+      evidence:["大道寺：偶然ラウンジに立ち寄っただけだと証言"]
+    },
+    { id:"d2", loc:"daidoji_loc", title:"大道寺の証言の矛盾", sub:"当夜の行動",
+      body:[
+        "美咲のスケジュールを確認すると、当夜、美咲自身はホテルの会議に出席しており、大道寺が護衛として同行する必要のない時間帯だったことが分かる。大道寺の「偶然」という説明と、時系列が噛み合わない。"
+      ],
+      evidence:["大道寺が護衛不要の時間帯にラウンジへ来ていたことが判明し、証言と食い違う"]
+    },
+    { id:"d3", loc:"daidoji_loc", title:"大道寺の告白：対峙、しかし", sub:"「手は、上げませんでした」",
+      body:[
+        "追及すると、大道寺は静かに認めた。「……独自に蒲生の行方を追い、あの部屋で対峙しました。直之様のことを、問い詰めました。」",
+        "「殴りたい気持ちを、必死で抑えました。それが、直之様の望むことではないと思ったからです。……蒲生を残し、部屋を出ました。その時、あの男は、まだ生きていました。呆然と、椅子に座り込んだままでしたが。」",
+        "水無瀬は、大道寺の言葉に、思わず安堵の表情を見せる。「よかった……。」——だが、まだ何も終わっていないことに、すぐに気づき、表情を引き締め直す。"
+      ],
+      evidence:["大道寺：蒲生と対峙したが、手を上げずに部屋を出たと証言（この時点で蒲生は生存）"]
+    },
+    { id:"p1", loc:"phonecheck", title:"バーナーフォンの通話記録", sub:"頻繁な発着信先",
+      body:[
+        "通信会社への照会で、バーナーフォンの通話記録が判明。ここ数週間、同じ一つの番号との間で、頻繁な発着信が繰り返されていた。事件当夜、大道寺が去った直後にも、着信が一件記録されている。"
+      ],
+      evidence:["バーナーフォンには、同じ番号との頻繁な発着信記録があった","大道寺が去った直後、この番号から着信があった"]
+    },
+    { id:"p2", loc:"phonecheck", title:"番号の一致", sub:"下四桁が過去の記録と重なる",
+      body:[
+        "頻繁に発着信していた番号の下四桁が、過去の事件で見た、素性不明の会社の番号と一致することに気づく。ただし水無瀬は、大道寺への複雑な思いに気を取られ、この一致に自分では気づけなかった。",
+        "「……すみません、天才探偵さんに言われるまで、全然気づきませんでした」と、水無瀬は悔しそうに呟いた。"
+      ],
+      evidence:["バーナーフォンの頻繁な発着信先の番号下四桁が、過去の事件の番号と一致していた"],
+      silhouette: {
+        id: "frag4",
+        title: "バーナーフォンの発着信番号",
+        text: "蒲生が潜伏中に使っていた使い捨て携帯。頻繁に発着信していた番号の下四桁が、過去の事件で見た素性不明の会社の番号と一致した。大道寺が去った直後にも、この番号から着信が入っていた。水無瀬はこの回、自分の判断ミスに気を取られ、この一致に自力では気づけなかった。天才探偵に指摘されて、初めて気づいた。"
+      }
+    },
+    { id:"c1", loc:"cctv", title:"ラウンジの防犯カメラ：大道寺の退出", sub:"個室付近の映像",
+      body:[
+        "当夜、個室の近くの廊下を、大道寺が通り、その後足早に立ち去る姿がカメラに記録されていた。時間は、遠藤が言い争う声を聞いた時間帯とほぼ一致する。"
+      ],
+      evidence:["防犯カメラに、当夜大道寺が個室付近から立ち去る姿が記録されていた"]
+    },
+    { id:"c2", loc:"cctv", title:"防犯カメラ：もう一人の来訪者", sub:"大道寺が去った直後",
+      body:[
+        "大道寺が立ち去った、わずか数分後――今度は、支配人の如月が、その個室へ向かう姿が記録されていた。滞在時間は、約15分。",
+        "如月が退室した後、カメラに新たな動きは記録されておらず、その後まもなく、遺体が発見されている。"
+      ],
+      evidence:["大道寺が去った数分後、如月が個室へ向かい約15分滞在していた","如月の退室後、遺体が発見されるまで新たな出入りは記録されていない"]
+    },
+    { id:"c3", loc:"cctv", title:"通用口の出入り記録", sub:"念のための確認",
+      body:[
+        "従業員用の通用口の記録も確認したが、該当の時間帯、如月以外の出入りは記録されていなかった。"
+      ],
+      evidence:["該当時間帯、通用口からの出入りは如月以外に記録されていなかった"]
+    },
+    { id:"f1", loc:"final", title:"如月の所在確認", sub:"ラウンジの支配人室にて",
+      body:[
+        "支配人室を訪ねると、如月は帳簿を前に、静かに座っていた。天才探偵たちの気配に気づくと、ゆっくりと顔を上げる。抵抗する様子は、なかった。"
+      ],
+      evidence:["如月は支配人室で、静かに帳簿を前にしていた"]
+    },
+  ],
+
+  questions: {
+    q2: [
+      { id:"a", label:"如月が個室を訪ね、灯影会からの最後通牒を突きつけ、絶望した蒲生が自ら命を絶った" },
+      { id:"b", label:"大道寺が、口論の末にカーテンの紐で絞殺した" },
+      { id:"c", label:"神楽坂が、口論の末に突発的に殺害した" },
+      { id:"d", label:"久保田が、商売敵としての恨みから殺害した" },
+    ],
+    q3: [
+      { id:"a", label:"口封じのため、蒲生を追い詰めて自死に至らしめ、組織の実態が明るみに出るのを防ぐため" },
+      { id:"b", label:"証拠不十分のまま逃亡した蒲生への、私的な制裁" },
+      { id:"c", label:"ラウンジの経営を巡る対立" },
+      { id:"d", label:"個人的な金銭トラブル" },
+    ],
+  },
+  correct: { q1:["kisaragi"], q2:"a", q3:"a" },
+
+  confrontation: {
+    culpritName: "如月",
+    intro: "支配人室、天才探偵は如月と向き合う。「如月さん。あの夜、蒲生さんの部屋を訪れ、彼を死に追いやったのは、あなたですね。」如月は、静かに天才探偵を見つめ返した。",
+    rounds: [
+      {
+        rebuttal: "「……何をおっしゃりたいのか、分かりかねます。私は、ただの支配人です。」",
+        hit: "如月の声が、わずかに硬くなる。「……見回りをしていただけです。」",
+        options: [
+          { id:"c1", label:"防犯カメラに残っていた、大道寺さんが去った直後、あなたが個室へ向かう姿", correct:true },
+          { id:"c2", label:"神楽坂さんの、はぐらかすような態度", correct:false },
+          { id:"c3", label:"久保田さんと蒲生の、商売敵としての因縁", correct:false },
+          { id:"c4", label:"大道寺さんが、蒲生と口論になっていたという事実", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「見回りをしていただけです。」",
+        hit: "如月は、わずかに目を伏せる。もう、取り繕う余裕もないようだった。",
+        options: [
+          { id:"c5", label:"バーナーフォンに残っていた、大道寺さんが去った直後の着信記録――その番号の下四桁が、過去の事件の番号と一致していたという事実", correct:true },
+          { id:"c6", label:"検視医の所見――蒲生の死には、外部からの強い抵抗の跡がなかったこと", correct:false },
+          { id:"c7", label:"遠藤さんが聞いた、当夜の言い争いの声（相手の姿は不明）", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「……」如月は答えない。だが、その沈黙が、もう十分な答えだった。",
+        hit: "如月は、静かに目を閉じた。",
+        options: [
+          { id:"c8", label:"蒲生の手帳にあった、事件当日の『もう、逃げ切れない』という乱れた書き込み", correct:true },
+          { id:"c9", label:"蒲生が計画していた、翌週の海外逃亡の航空券", correct:false },
+          { id:"c10", label:"大道寺さんの、桔梗家への忠誠心", correct:false },
+        ],
+      },
+    ],
+    finalConfession: [
+      "如月は、長い沈黙の後、静かに語り始めた。「……はい。あの部屋を訪ねたのは、私です。大道寺様が去られた後、ちょうど良い頃合いだと思いました。」",
+      "「私は、ある方々から、この店の便宜を図る見返りに、色々な『お願い事』を引き受けてきました。今回は、『蒲生に、最後の選択を促してほしい』とだけ、指示されました。」",
+      "「部屋に入り、彼に伝えました。『これ以上の逃亡は、許されません。あなたの知っていることが公になれば、私たちも困る。ですが、静かに幕を引いていただけるなら、ご家族には、十分な生活が保証されます』と。」",
+      "如月は、深く目を伏せた。「手は、上げていません。……ただ、彼の目の前に、紐を置いただけです。あとは、部屋を出て、静かに待っていただけです。」",
+      "「これが、殺人と呼べるかどうかは、私には分かりません。……ですが、私が彼を、あの選択に追い込んだことは、事実です。」",
+    ],
+    gameOverText: "如月は静かに首を振ると、それ以上何も語らなかった。「証拠が、まだ足りないのではありませんか」とだけ言い残す。決定的な言葉を引き出せないまま、この対決は失敗に終わった——。",
+  },
+
+  solutionSections: [
+    { title:"第一部　殺人ではなかった死",
+      html:"当初、絞殺による殺人と思われた蒲生の死は、検視の結果、<strong>自死の可能性が高い</strong>と判明した。事件は、「誰が殺したか」ではなく、「誰が、彼をその選択に追い込んだか」を追う、まったく違う様相を見せ始めた。" },
+    { title:"第二部　対峙、しかし手は上げず",
+      html:"桔梗家の運転手・大道寺は、独自に蒲生の行方を突き止め、直之への思いをぶつけに向かっていた。だが、彼は手を上げることなく、部屋を後にした。彼が去った時、蒲生はまだ生きていた。" },
+    { title:"第三部　入れ替わりの訪問者",
+      html:"大道寺が去った数分後、防犯カメラは、支配人・如月が個室へ向かう姿を捉えていた。バーナーフォンには、同じ時間帯に、素性不明の組織と繋がる番号からの着信が記録されていた。" },
+    { title:"第四部　最後通牒",
+      html:"如月は、灯影会からの指示を受け、蒲生に『最後の選択』を促していた。手を下すことなく、紐を置き、部屋を出て待つ――直接手を汚さずに、相手を追い詰めるという、この組織らしいやり口だった。<strong>蒲生を追い詰めていた『奴ら』の正体が、ここに初めて輪郭を現した。</strong>" },
+  ],
+  evidenceTable: [
+    ["1","検視医の所見（外部からの抵抗の跡なし）","他殺ではなく自死の可能性が高いと判明"],
+    ["2","大道寺の証言（対峙したが、生きたまま部屋を出た）","犯行時刻の絞り込みと、大道寺の容疑の解消"],
+    ["3","防犯カメラ（大道寺退出の数分後、如月が入室）","如月が最後の訪問者だったことの裏付け"],
+    ["4","バーナーフォンの着信記録の番号一致","素性不明の組織との継続的な接触の痕跡"],
+    ["5","蒲生の手帳（『もう、逃げ切れない』）","如月の訪問直後に絶望していたことの裏付け"],
+  ],
+  epilogue: {
+    intro: "如月の身柄が確保され、「グラン・レガーロ殺人事件」――いや、正確には自殺教唆事件は、その全貌を明らかにした。だが、事件の向こうに見えた組織の姿は、まだ影のままだった。",
+    characters: [
+      { who:"桔梗家の運転手・大道寺", text:"手を上げなかったことを、静かに誇りながらも、「もっと早く、誰かに相談していれば」と、複雑な表情を見せた。" },
+      { who:"ラウンジ支配人・如月", text:"「便宜を図られ続けていた」というだけで、組織の実態については、多くを語らなかった。「私も、末端の一人に過ぎません」とだけ、繰り返した。" },
+      { who:"助手・水無瀬綾", text:"「灯影会……今度こそ、はっきりそう呼んでいいんですよね」と、これまでで一番、はっきりとした声で言った。「私たち、ようやく、あの影の輪郭に触れたんだと思います。」" },
+    ],
+    outro: "水無瀬は、これまで集めてきた断片を、もう一度すべて並べ直す。契約書の隅の社名、送金記録、素性不明の調査会社、番号の一致――そして今度は、はっきりとその名を口にできる。「灯影会」。次はきっと、最後の対決になる。"
+  },
+  redHerrings: [
+    "神楽坂の不審な態度：個人的な事情によるもので、事件とは無関係だった。",
+    "久保田との商売敵としての因縁：動機としては疑われたが、確固たるアリバイにより除外された。",
+    "如月の経営難の噂：時期的に事件とは無関係だった。",
+    "大道寺の対峙：強い動機と機会はあったが、実際には手を上げずに部屋を去っていた。",
+  ]
+};
+
+const episodes = [ episode1, episode2, episode3, episode4, episode5, episode6, episode7, episode8, episode9, episode10, episode11 ];
+
+
 
 /* ========================================================================
    STATE
@@ -3118,6 +4189,7 @@ function loadEpisode(ep){
   confrontLog = [];
   decisionChoices = {};
   investigationFlags = {};
+  usingPartialConfrontation = false;
   currentLoc = ep.locations[0].id;
 
   document.getElementById("epCrumb").style.display = "inline-block";
@@ -3560,9 +4632,12 @@ function arraysMatchAsSets(a,b){
 
 function submitDeduction(){
   const ep = currentEpisode;
-  const q1Correct = arraysMatchAsSets(selected.q1, ep.correct.q1);
-  const correct = q1Correct && selected.q2===ep.correct.q2 && selected.q3===ep.correct.q3;
-  const correctCount = [q1Correct, selected.q2===ep.correct.q2, selected.q3===ep.correct.q3].filter(Boolean).length;
+  const q1Full = arraysMatchAsSets(selected.q1, ep.correct.q1);
+  const restCorrect = selected.q2===ep.correct.q2 && selected.q3===ep.correct.q3;
+  const correct = q1Full && restCorrect;
+  const q1Partial = ep.correctPartial && arraysMatchAsSets(selected.q1, ep.correctPartial);
+  const partialSuccess = !correct && q1Partial && restCorrect;
+  const correctCount = [q1Full, selected.q2===ep.correct.q2, selected.q3===ep.correct.q3].filter(Boolean).length;
   pendingCorrectCount = correctCount;
 
   // A bad earlier decision may have let the culprit slip away for good —
@@ -3574,8 +4649,20 @@ function submitDeduction(){
     return;
   }
 
+  if(partialSuccess && ep.partialConfrontation){
+    // Named the accomplice correctly but not the mastermind — the accomplice
+    // is confronted, but the ringleader gets away. Revealed only here.
+    usingPartialConfrontation = true;
+    confrontRound = 0;
+    confrontStage = "question";
+    confrontLog = [];
+    goPhase(3);
+    return;
+  }
+
   if(correct && ep.confrontation){
     // Correct deduction unlocks the face-to-face confrontation challenge.
+    usingPartialConfrontation = false;
     confrontRound = 0;
     confrontStage = "question";
     confrontLog = [];
@@ -3588,6 +4675,7 @@ function submitDeduction(){
   goPhase(4);
 }
 let pendingCorrectCount = 0;
+let usingPartialConfrontation = false; // true when only the accomplice was correctly named
 
 function renderEscapeEnding(ep){
   const banner = document.getElementById("resultBanner");
@@ -3620,9 +4708,13 @@ function renderEscapeEnding(ep){
    ======================================================================== */
 let shuffledConfrontOpts = [];
 
+function getActiveConfrontation(ep){
+  return usingPartialConfrontation ? ep.partialConfrontation : ep.confrontation;
+}
+
 function renderConfrontation(){
   const ep = currentEpisode;
-  const conf = ep.confrontation;
+  const conf = getActiveConfrontation(ep);
   const wrap = document.getElementById("confrontContent");
 
   const logHtml = confrontLog.map(entry => `
@@ -3702,7 +4794,7 @@ function renderConfrontation(){
 
 function chooseEvidence(i){
   const ep = currentEpisode;
-  const conf = ep.confrontation;
+  const conf = getActiveConfrontation(ep);
   const round = conf.rounds[confrontRound];
   const opt = shuffledConfrontOpts[i];
 
@@ -3718,7 +4810,7 @@ function chooseEvidence(i){
 
 function advanceConfrontation(){
   const ep = currentEpisode;
-  const conf = ep.confrontation;
+  const conf = getActiveConfrontation(ep);
   confrontRound++;
   if(confrontRound >= conf.rounds.length){
     confrontStage = "confession";
@@ -3737,6 +4829,12 @@ function retryConfrontation(){
 
 function finishConfrontation(){
   const ep = currentEpisode;
+  if(usingPartialConfrontation){
+    clearedEpisodes.add(ep.id);
+    renderPartialResult(ep);
+    goPhase(4);
+    return;
+  }
   clearedEpisodes.add(ep.id);
   renderResult(true, pendingCorrectCount);
   goPhase(4);
@@ -3825,6 +4923,56 @@ function renderResult(correct, correctCount){
 
 function toggleAlt(){
   document.getElementById("altRoute").classList.toggle("visible");
+}
+
+function renderPartialResult(ep){
+  const p = ep.partialOutcome;
+  const banner = document.getElementById("resultBanner");
+  const body = document.getElementById("resultBody");
+
+  banner.className = "result-banner wrong";
+  banner.innerHTML = `
+    <div class="verdict display">${p.resultVerdict.title}</div>
+    <div class="sub">${p.resultVerdict.sub}</div>
+  `;
+
+  const sections = p.solutionSections.map(s=>`
+    <div class="solution-section">
+      <h2 class="display"><span class="num">${s.title.split("　")[0]}</span>${s.title.split("　")[1]||""}</h2>
+      <p>${s.html}</p>
+    </div>
+  `).join("");
+
+  const evidenceRows = p.evidenceTable.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("");
+
+  const epChars = p.epilogue.characters.map(c=>`
+    <div class="char"><div class="who">${c.who}</div><p>${c.text}</p></div>
+  `).join("");
+
+  body.innerHTML = `
+    ${sections}
+    <div class="solution-section">
+      <h2 class="display"><span class="num">証拠</span>一覧（時系列）</h2>
+      <table class="evidence-table">
+        <tr><th>#</th><th>証拠</th><th>意味</th></tr>
+        ${evidenceRows}
+      </table>
+    </div>
+    <div class="solution-section escape-ending">
+      <div class="ee-title display">${p.escapeNote.title}</div>
+      ${p.escapeNote.paragraphs.map(t=>`<p>${t}</p>`).join("")}
+    </div>
+    <div class="solution-section epilogue-block">
+      <h2 class="display"><span class="num">終章</span>エピローグ</h2>
+      <p>${p.epilogue.intro}</p>
+      ${epChars}
+      <p style="margin-top:20px;">${p.epilogue.outro}</p>
+    </div>
+    <div class="cta-row" style="margin-top:36px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn ghost" onclick="loadEpisode(currentEpisode)">この事件を遊び直す</button>
+      <button class="btn" onclick="goSelect()">事件一覧に戻る</button>
+    </div>
+  `;
 }
 
 /* init */
