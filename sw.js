@@ -1,25 +1,25 @@
-const CACHE_NAME = "jikenbo-cache-v9";
+const CACHE_NAME = "jikenbo-cache-v10";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/apple-touch-icon.png",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./apple-touch-icon.png",
   "./favicon.ico",
-  "./covers/ep1.jpg",
-  "./covers/ep2.jpg",
-  "./covers/ep3.jpg",
-  "./covers/ep4.jpg",
-  "./covers/ep5.jpg",
-  "./covers/ep6.jpg",
-  "./covers/ep7.jpg",
-  "./covers/ep8.jpg",
-  "./covers/ep9.jpg",
-  "./covers/ep10.jpg",
-  "./covers/ep11.jpg",
-  "./covers/ep12.jpg",
-  "./covers/ep13.jpg"
+  "./ep1.jpg",
+  "./ep2.jpg",
+  "./ep3.jpg",
+  "./ep4.jpg",
+  "./ep5.jpg",
+  "./ep6.jpg",
+  "./ep7.jpg",
+  "./ep8.jpg",
+  "./ep9.jpg",
+  "./ep10.jpg",
+  "./ep11.jpg",
+  "./ep12.jpg",
+  "./ep13.jpg"
 ];
 
 self.addEventListener("install", (event) => {
