@@ -1,4 +1,4 @@
-const CACHE_NAME = "jikenbo-cache-v7";
+const CACHE_NAME = "jikenbo-cache-v9";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -17,7 +17,9 @@ const APP_SHELL = [
   "./covers/ep8.jpg",
   "./covers/ep9.jpg",
   "./covers/ep10.jpg",
-  "./covers/ep11.jpg"
+  "./covers/ep11.jpg",
+  "./covers/ep12.jpg",
+  "./covers/ep13.jpg"
 ];
 
 self.addEventListener("install", (event) => {
