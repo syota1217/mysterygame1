@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>謎解き探偵ゲーム — 事件簿</title>
-<meta name="description" content="孤島の洋館から始まる、なりきり謎解き探偵ゲーム。手がかりを集め、推理し、事件を解決せよ。">
+<title>なぞたん — 謎解き探偵記</title>
+<meta name="description" content="なぞたん — 謎解き探偵記。孤島の洋館から始まる、なりきり謎解き探偵ゲーム。手がかりを集め、推理し、事件を解決せよ。">
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#12141c">
@@ -17,7 +17,7 @@
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="事件簿">
+<meta name="apple-mobile-web-app-title" content="なぞたん">
 <meta name="mobile-web-app-capable" content="yes">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -126,6 +126,16 @@
   .install-btn{ display:block; margin:16px auto 0; padding:9px 22px; font-size:12px; letter-spacing:.1em; }
   .silhouette-header-btn{ display:block; margin:10px auto 0; padding:8px 20px; font-size:11.5px; letter-spacing:.08em; border-color:var(--crimson); color:var(--crimson-bright); }
   .silhouette-header-btn:hover{ background:rgba(143,42,53,0.12); }
+  .dlc-header-btn{ display:block; margin:8px auto 0; padding:8px 20px; font-size:11.5px; letter-spacing:.08em; }
+  .dlc-input{
+    width:100%; box-sizing:border-box; background:var(--panel-light); border:1px solid var(--line);
+    color:var(--paper); padding:12px 14px; font-size:14px; border-radius:6px; letter-spacing:.05em;
+    font-family:'Shippori Mincho', serif;
+  }
+  .dlc-input:focus{ outline:none; border-color:var(--gold); }
+  .dlc-msg{ margin-top:12px; font-size:12.5px; min-height:1.2em; }
+  .dlc-msg.success{ color:var(--gold); }
+  .dlc-msg.error{ color:var(--crimson-bright); }
   .silhouette-tag{ display:inline-block; margin-top:8px; font-size:11px; color:#0b0000; background:var(--crimson-bright); padding:3px 10px; border-radius:2px; letter-spacing:.05em; }
   .sf-intro{ font-size:13px; color:var(--ink-dim); margin:-4px 0 18px; }
   .sf-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -533,11 +543,12 @@
 
   <header class="top">
     <div class="eyebrow">MURDER MYSTERY · 推理探偵ゲーム</div>
-    <h1 class="title display" id="headerTitle">事件簿</h1>
+    <h1 class="title display" id="headerTitle">なぞたん</h1>
     <div class="subtitle" id="headerSubtitle">EPISODE ARCHIVE</div>
     <div class="ep-crumb" id="epCrumb" style="display:none;" onclick="goSelect()">← 事件一覧に戻る</div>
     <button id="installBtn" class="btn ghost install-btn" style="display:none;">📥 アプリをインストール</button>
     <button id="silhouetteBtn" class="btn ghost silhouette-header-btn" onclick="openSilhouetteFiles()">🕵 灯影会ファイル (0/5)</button>
+    <button id="dlcUnlockBtn" class="btn ghost dlc-header-btn" onclick="openDlcModal()">🔒 隠しコード</button>
     <div class="phase-rail" id="phaseRail" style="display:none;">
       <div class="p" data-phase="0">序章</div>
       <div class="p" data-phase="1">捜査</div>
@@ -625,6 +636,21 @@
     </div>
     <p class="sf-intro">第二章の各話に散らばる、正体不明の組織の断片。捜査の中で見つけたものが、ここに記録されていく。</p>
     <div class="sf-grid" id="silhouetteWrap"></div>
+  </div>
+</div>
+
+<div class="map-modal" id="dlcModal" onclick="if(event.target===this) closeDlcModal()">
+  <div class="map-modal-inner">
+    <div class="map-modal-head">
+      <div class="map-modal-title display">隠しコード</div>
+      <button class="map-close-btn" onclick="closeDlcModal()">✕</button>
+    </div>
+    <p class="sf-intro">物語のどこかに隠された言葉を知っているなら、ここに。</p>
+    <input type="text" id="dlcCodeInput" class="dlc-input" placeholder="コードを入力" autocomplete="off" onkeydown="if(event.key==='Enter') submitDlcCode();">
+    <div class="cta-row" style="margin-top:14px;">
+      <button class="btn" onclick="submitDlcCode()">解放する</button>
+    </div>
+    <p id="dlcMsg" class="dlc-msg"></p>
   </div>
 </div>
 
@@ -5516,6 +5542,69 @@ function closeSilhouetteFiles(){
 }
 
 /* ========================================================================
+   HIDDEN CODE (DLC-style unlock)
+   ------------------------------------------------------------------------
+   Purely a playful in-fiction lock, not real access control — this is a
+   static site, so anyone can read the code in the page source. It's meant
+   as a scavenger-hunt reward, not real security. Persisted to localStorage
+   so it stays unlocked on this device once solved.
+   Any future episode that should stay hidden until unlocked gets
+   `requiresUnlock: true` and `status: "locked"` — applyDlcUnlock() flips
+   it to "available" once the code is entered correctly.
+   ======================================================================== */
+const DLC_PASSWORD = "SHADOW-13"; // TODO: 本番用のコードに差し替えてください
+const DLC_STORAGE_KEY = "dlc_season3_unlocked_v1";
+let dlcUnlocked = false;
+
+function loadDlcUnlock(){
+  try{
+    dlcUnlocked = localStorage.getItem(DLC_STORAGE_KEY) === "1";
+  } catch(e){ dlcUnlocked = false; }
+  if(dlcUnlocked) applyDlcUnlock();
+}
+
+function applyDlcUnlock(){
+  episodes.forEach(ep=>{
+    if(ep.requiresUnlock) ep.status = "available";
+  });
+}
+
+function openDlcModal(){
+  document.getElementById("dlcCodeInput").value = "";
+  const msg = document.getElementById("dlcMsg");
+  msg.textContent = dlcUnlocked ? "すでに解放済みです。" : "";
+  msg.className = "dlc-msg" + (dlcUnlocked ? " success" : "");
+  document.getElementById("dlcModal").classList.add("visible");
+}
+function closeDlcModal(){
+  document.getElementById("dlcModal").classList.remove("visible");
+}
+
+function submitDlcCode(){
+  const input = document.getElementById("dlcCodeInput");
+  const msg = document.getElementById("dlcMsg");
+  const val = input.value.trim();
+
+  if(!val){
+    msg.textContent = "コードを入力してください。";
+    msg.className = "dlc-msg error";
+    return;
+  }
+
+  if(val.toUpperCase() === DLC_PASSWORD.toUpperCase()){
+    dlcUnlocked = true;
+    try{ localStorage.setItem(DLC_STORAGE_KEY, "1"); } catch(e){ /* best effort */ }
+    applyDlcUnlock();
+    renderCaseGrid();
+    msg.textContent = "コードが一致しました。新しい記録が解放されました。";
+    msg.className = "dlc-msg success";
+  } else {
+    msg.textContent = "そのコードには、心当たりがないようです。";
+    msg.className = "dlc-msg error";
+  }
+}
+
+/* ========================================================================
    EPISODE SELECT SCREEN
    ======================================================================== */
 const CHAPTER_INFO = {
@@ -5578,7 +5667,7 @@ function goSelect(){
   currentEpisode = null;
   document.getElementById("epCrumb").style.display = "none";
   document.getElementById("phaseRail").style.display = "none";
-  document.getElementById("headerTitle").textContent = "事件簿";
+  document.getElementById("headerTitle").textContent = "なぞたん";
   document.getElementById("headerSubtitle").textContent = "EPISODE ARCHIVE";
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("visible"));
   document.getElementById("screen-select").classList.add("visible");
@@ -6429,6 +6518,7 @@ function renderPartialResult(ep){
 /* init */
 loadSilhouetteFragments();
 renderSilhouetteBadge();
+loadDlcUnlock();
 renderCaseGrid();
 
 /* ========================================================================
