@@ -189,17 +189,24 @@
   @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
 
   /* ===== Episode select ===== */
-  .chapter-section{ margin-top:44px; }
-  .chapter-section:first-child{ margin-top:28px; }
-  .chapter-heading{
-    display:flex; align-items:baseline; gap:14px; margin-bottom:4px;
-    padding-bottom:12px; border-bottom:1px solid var(--line);
+  .chapter-tabs{
+    display:flex; gap:10px; flex-wrap:wrap; margin:28px 0 0;
+    border-bottom:1px solid var(--line); padding-bottom:0;
   }
-  .chapter-heading .ch-label{ font-size:12px; letter-spacing:.25em; color:var(--crimson-bright); }
-  .chapter-heading .ch-title{ font-size:20px; color:var(--paper); letter-spacing:.06em; }
+  .chapter-tab{
+    display:flex; flex-direction:column; align-items:flex-start; gap:2px;
+    background:none; border:none; border-bottom:2px solid transparent;
+    padding:10px 18px 14px; cursor:pointer; text-align:left;
+    transition:border-color .2s ease, opacity .2s ease;
+    opacity:.55;
+  }
+  .chapter-tab:hover{ opacity:.85; }
+  .chapter-tab.active{ opacity:1; border-bottom-color:var(--crimson-bright); }
+  .chapter-tab .ch-label{ font-size:11px; letter-spacing:.25em; color:var(--crimson-bright); }
+  .chapter-tab .ch-title{ font-size:16px; color:var(--paper); letter-spacing:.05em; }
   .case-grid{
     display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-    gap:20px; margin:20px 0 0;
+    gap:20px; margin:24px 0 0;
   }
   .case-card{
     background:var(--glass-bg);
@@ -5613,6 +5620,8 @@ const CHAPTER_INFO = {
   2: { label:"第二章", title:"灯影を追う者たち" },
 };
 
+let activeChapterKey = null;
+
 function renderCaseGrid(){
   const outer = document.getElementById("caseGrid");
   outer.innerHTML = "";
@@ -5624,43 +5633,48 @@ function renderCaseGrid(){
     chapters[ch].push(ep);
   });
 
-  Object.keys(chapters).sort((a,b)=>a-b).forEach(chNum=>{
+  const sortedKeys = Object.keys(chapters).sort((a,b)=>a-b);
+  if(activeChapterKey === null || !chapters[activeChapterKey]){
+    activeChapterKey = sortedKeys[0];
+  }
+
+  const tabBar = document.createElement("div");
+  tabBar.className = "chapter-tabs";
+  sortedKeys.forEach(chNum=>{
     const info = CHAPTER_INFO[chNum] || { label:`第${chNum}章`, title:"" };
-    const section = document.createElement("div");
-    section.className = "chapter-section";
-    section.innerHTML = `
-      <div class="chapter-heading">
-        <span class="ch-label">${info.label}</span>
-        <span class="ch-title display">${info.title}</span>
+    const tab = document.createElement("button");
+    tab.className = "chapter-tab" + (chNum===activeChapterKey ? " active" : "");
+    tab.innerHTML = `<span class="ch-label">${info.label}</span><span class="ch-title display">${info.title}</span>`;
+    tab.onclick = ()=>{ activeChapterKey = chNum; renderCaseGrid(); window.scrollTo({top:0, behavior:"smooth"}); };
+    tabBar.appendChild(tab);
+  });
+  outer.appendChild(tabBar);
+
+  const grid = document.createElement("div");
+  grid.className = "case-grid";
+  chapters[activeChapterKey].forEach(ep=>{
+    const locked = ep.status === "locked";
+    const cleared = clearedEpisodes.has(ep.id);
+    const card = document.createElement("div");
+    card.className = "case-card" + (locked ? " locked":"");
+    card.innerHTML = `
+      ${ep.cover ? `
+      <div class="case-cover-wrap">
+        <img class="case-cover" src="${ep.cover}" alt="${ep.title}" loading="lazy">
+        <div class="case-cover-fade"></div>
+      </div>` : `<div class="case-cover-placeholder">NO IMAGE</div>`}
+      <div class="case-body">
+        <div class="case-num">${ep.fileLabel || ("FILE No."+String(ep.number).padStart(2,"0"))}</div>
+        <div class="case-title display">${ep.title}</div>
+        <div class="case-sub">${ep.subtitle}</div>
+        <div class="case-teaser">${ep.teaser}</div>
+        <div class="case-status ${locked?'locked':(cleared?'cleared':'')}">${locked ? "近日公開" : (cleared ? "解決済み" : "捜査可能")}</div>
       </div>
     `;
-    const grid = document.createElement("div");
-    grid.className = "case-grid";
-    chapters[chNum].forEach(ep=>{
-      const locked = ep.status === "locked";
-      const cleared = clearedEpisodes.has(ep.id);
-      const card = document.createElement("div");
-      card.className = "case-card" + (locked ? " locked":"");
-      card.innerHTML = `
-        ${ep.cover ? `
-        <div class="case-cover-wrap">
-          <img class="case-cover" src="${ep.cover}" alt="${ep.title}" loading="lazy">
-          <div class="case-cover-fade"></div>
-        </div>` : `<div class="case-cover-placeholder">NO IMAGE</div>`}
-        <div class="case-body">
-          <div class="case-num">${ep.fileLabel || ("FILE No."+String(ep.number).padStart(2,"0"))}</div>
-          <div class="case-title display">${ep.title}</div>
-          <div class="case-sub">${ep.subtitle}</div>
-          <div class="case-teaser">${ep.teaser}</div>
-          <div class="case-status ${locked?'locked':(cleared?'cleared':'')}">${locked ? "近日公開" : (cleared ? "解決済み" : "捜査可能")}</div>
-        </div>
-      `;
-      if(!locked){ card.onclick = ()=> loadEpisode(ep); }
-      grid.appendChild(card);
-    });
-    section.appendChild(grid);
-    outer.appendChild(section);
+    if(!locked){ card.onclick = ()=> loadEpisode(ep); }
+    grid.appendChild(card);
   });
+  outer.appendChild(grid);
 }
 
 function goSelect(){
