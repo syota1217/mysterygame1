@@ -488,6 +488,21 @@
 
   /* ===== Map ===== */
   .loc-tabs-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:0; }
+  .time-indicator{
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    padding:10px 16px; margin-bottom:16px;
+  }
+  .time-slots{ display:flex; gap:4px; align-items:center; }
+  .time-slot{
+    font-size:11.5px; letter-spacing:.08em; color:var(--ink-faint); padding:4px 10px;
+    border-radius:20px; border:1px solid var(--line); position:relative;
+  }
+  .time-slot.past{ color:var(--ink-dim); border-color:var(--gold-soft); }
+  .time-slot.active{ color:var(--gold); border-color:var(--gold); background:rgba(185,146,79,0.1); font-weight:700; box-shadow:0 0 10px rgba(185,146,79,0.2); }
+  .time-advance-btn{ padding:8px 18px; font-size:11.5px; letter-spacing:.06em; white-space:nowrap; }
+  .clue-card.auto-report{ border-color:var(--gold-soft); }
+  .clue-card.auto-report .clue-head{ background:rgba(185,146,79,0.05); }
   .loc-tabs-row .loc-tabs{ flex:1; margin-bottom:0; }
   .map-btn{ padding:8px 16px; font-size:12px; letter-spacing:.08em; white-space:nowrap; flex-shrink:0; }
 
@@ -582,6 +597,7 @@
   <section class="screen" id="screen-1">
     <div class="investigate-layout">
       <div>
+        <div class="time-indicator" id="timeIndicatorWrap" style="display:none;"></div>
         <div class="loc-tabs-row">
           <div class="loc-tabs" id="locTabs"></div>
           <button class="btn ghost map-btn" onclick="openMap()">🗺 見取り図</button>
@@ -5453,7 +5469,449 @@ const gaiden3 = {
   },
 };
 
-const episodes = [ episode1, episode2, episode3, episode4, episode5, episode6, episode7, episode8, episode9, episode10, episode11, episode12, episode13, gaiden1, gaiden2, gaiden3 ];
+const nazotan2_ep1a = {
+  id: "tenbin-no-toki-zen",
+  chapter: 3,
+  cover: "ntt1.jpg",
+  number: 1,
+  fileLabel: "なぞたん2 ―― 第一話〈前編〉",
+  title: "天秤の刻 —— 桐原法律事務所殺人事件〈前編〉",
+  subtitle: "桐原法律事務所〈なぞたん2・第一話 前編〉",
+  teaser: "証拠不十分で無罪を勝ち取った弁護士が、無人の事務所で息絶えた。デスクには、見覚えのない天秤のブローチ。",
+  status: "locked",
+  requiresUnlock: true,
+  investigationOnly: true,
+
+  prologueLede: "都心の裁判所に隣接する「桐原法律事務所」。刑事事件で証拠不十分による無罪判決を勝ち取り、世間から「また犯罪者を野に放った」と批判を浴びていた弁護士・桐原が、無人の事務所で遺体となって発見された。デスクには、審理資料と共に、見覚えのない小さな金属片――天秤を象ったブローチが置かれていた。",
+  prologueParagraphs: [
+    "東雲涼介、石森隆一、水無瀬綾――3人はチームとして、この事件に挑む。今回は、時間の流れそのものが、捜査を左右する。日中にしか話せない相手がいれば、夜にしか踏み込めない場所もある。",
+    "そして、天才探偵が直接足を運ばなくても、チームの誰かが、時間の経過とともに、独自の成果を届けてくれることもある。"
+  ],
+  cast: [],
+
+  locations: [
+    { id:"scene",   label:"所長室・遺体", timeSlot:0 },
+    { id:"kinko",   label:"金庫と手紙", timeSlot:0, unlockAfter:"sc3" },
+    { id:"courthouse", label:"裁判所・関係者", timeSlot:1 },
+    { id:"defendant", label:"被告人宅", timeSlot:1, unlockAfter:"ct5" },
+    { id:"evening", label:"夕方の三ヶ所", timeSlot:2 },
+    { id:"night",   label:"深夜", timeSlot:3 },
+  ],
+
+  investigationBudget: 17,
+  unlockThreshold: 15,
+
+  clues: [
+    { id:"sc1", loc:"scene", title:"発見時の状況", sub:"無人の所長室",
+      body:[
+        "清掃スタッフが、消灯時間を過ぎても電気がついたままなのに気づき確認したところ発見。デスクの椅子にもたれかかるように座った状態で、争った形跡はない。",
+        "傍らのマグカップに微かな異臭。毒物中毒の可能性が高いと、駆けつけた医師が見立てている。"
+      ],
+      evidence:["桐原は所長室で、争った形跡なく死亡していた（毒物中毒の疑い）"]
+    },
+    { id:"sc2", loc:"scene", title:"デスクの上のブローチ", sub:"裏に「08」の刻印",
+      body:[
+        "天秤を象った、銀色の小さな金属製ブローチ。片方の皿がわずかに傾いた、非対称のデザイン。裏面に、小さく「08」という刻印がある。",
+        "既製品にしては作りが凝っており、量産品ではなく特注、あるいは会員制の何かのために作られた品である可能性が高い。"
+      ],
+      evidence:["デスクに、裏面に『08』と刻まれた天秤のブローチが置かれていた"]
+    },
+    { id:"sc3", loc:"scene", title:"わずかに開いた金庫", sub:"部屋の隅",
+      body:[
+        "部屋の隅に据え付けられた金庫が、わずかに開いている。中身は、まだ確認できていない。"
+      ],
+      evidence:["部屋の隅の金庫が、わずかに開いていた"]
+    },
+    { id:"k1", loc:"kinko", title:"非公式の調査記録", sub:"桐原独自の洗い直し",
+      body:[
+        "桐原が過去に手がけた事件の、非公式な調査記録が数冊。表向きの弁護活動とは別に、依頼人の周辺を独自に調べ上げていた様子が伺える。",
+        "複数の事件に「本当は有罪だったのでは」と桐原自身が疑いを持っていたと思われる書き込みが残されている。"
+      ],
+      evidence:["桐原は、過去の複数の無罪判決について、独自に調査記録を残していた"]
+    },
+    { id:"k2", loc:"kinko", title:"直近の事件ファイル", sub:"「俺は、何を弁護したことになる」",
+      body:[
+        "直近の無罪判決についてのファイルが、一番厚い。被告人の当時の行動記録、目撃証言の矛盾点などが事細かにまとめられている。",
+        "最後のページに、桐原自身の走り書き：「もし、あれが本当に彼の仕業だったなら――俺は、何を弁護したことになる。」"
+      ],
+      evidence:["桐原は、直近の無罪判決の被告人への疑いを、独自に深めていた"]
+    },
+    { id:"k3", loc:"kinko", title:"差出人不明の警告状", sub:"天秤の印",
+      body:[
+        "封筒の中に、一枚の便箋。活字体で印字された短い文面：「あなたの仕事は、時に、正義から目を逸らす。もう一度、よく考える機会を差し上げます。」",
+        "便箋の隅に、小さく天秤の印。デスクにあったブローチと、同じ意匠だった。"
+      ],
+      evidence:["桐原の元に、天秤の印が押された差出人不明の警告状が届いていた"]
+    },
+    { id:"ct1", loc:"courthouse", title:"検察官の証言", sub:"判決後の内密な接触",
+      body:[
+        "検察官：「判決から数週間後、桐原先生の方から、直接連絡がありました。『あの事件について、もう一度、内密に話せないか』と。お会いすると、『自分の弁護が、正しかったのか分からなくなってきた』と、思い詰めた様子でした。」"
+      ],
+      evidence:["検察官：判決後、桐原自身が事件の真相を追い求めていたと証言"]
+    },
+    { id:"ct2", loc:"courthouse", title:"検察官の証言：天秤バッジの傍聴人", sub:"別の無罪判決の法廷でも",
+      body:[
+        "検察官：「以前、別の裁判で、似たような意匠のバッジをつけた傍聴人を見かけたことがあります。……そういえば、あれも、証拠不十分で被告人が無罪になった事件でした。」"
+      ],
+      evidence:["検察官：天秤のバッジをつけた人物が、過去の別の無罪判決の法廷にも現れていたと証言"]
+    },
+    { id:"ct3", loc:"courthouse", title:"被害者遺族の証言", sub:"「――ということですね」",
+      body:[
+        "遺族：「判決の後、藁にもすがる思いで相談した中に、少し変わった方がいました。名刺もいただかなかったので名前は分かりませんが、『法律で裁けないなら、別の形で、正義を取り戻す方法もあります』と。……胸元に、天秤のようなピンバッジが光っていた気がします。」",
+        "「40代くらい、物腰は丁寧でしたが、有無を言わせない雰囲気があって。話し方に、『――ということですね』と、必ず確認するように言葉を結ぶ癖がありました。」"
+      ],
+      evidence:["被害者遺族：天秤のバッジをつけた人物から『正義の代行』を持ちかけられていたと証言","その人物は40代くらいで、『――ということですね』という特徴的な話し方をしていた"]
+    },
+    { id:"ct4", loc:"courthouse", title:"共同経営者の証言", sub:"桐原の変化とブローチの目撃",
+      body:[
+        "経営者：「判決の後、様子がおかしくなっていました。夜遅くまで一人で残ることが増えて。判決から一週間も経たない頃、桐原の机の上に、似たようなブローチを見かけました。『これは何だ』と聞いたら、『気にするな』とだけ。」",
+        "経営者はまた、事務所の経営が数年思わしくなく、桐原の派手な勝訴が看板を支えていたことも認めた。"
+      ],
+      evidence:["共同経営者：判決から一週間も経たない頃には、桐原の机にブローチがあったと証言"]
+    },
+    { id:"ct5", loc:"courthouse", title:"パラリーガルの証言", sub:"被告人の身辺調査依頼",
+      body:[
+        "パラリーガル：「判決の後、先生に、被告人さんの判決後の足取りを、こっそり調べるよう頼まれました。調べていく中で、被告人さんが急に羽振りが良くなっていることに気づいて、報告したら、ひどく思い詰めた顔をされていました。」",
+        "「ブローチも、一度だけ机の上で見ました。触ろうとしたら、『触るな』と珍しく強い口調で。あの時の先生は、何かを決意しているような表情でした。」"
+      ],
+      evidence:["パラリーガル：桐原の依頼で被告人の身辺調査をしており、判決後の急な羽振りの良さに気づいていた"]
+    },
+    { id:"d1", loc:"defendant", title:"被告人本人への聞き込み", sub:"「妙な手紙が」",
+      body:[
+        "被告人：「判決後、生活が変わったのは、ちょっとした投資が上手くいっただけです」と説明を濁す。天秤の印について尋ねると、明らかに動揺し、「最近、妙な手紙が、私の元にも届くようになったんです。『いずれ、正しい裁きが下る』とだけ。同じ、天秤の印がありました」と認めた。",
+        "桐原との判決後の接触は否定するが、動揺の度合いから、何かを隠している様子が伺えた。"
+      ],
+      evidence:["被告人：桐原と同様、天秤の印が押された警告状を受け取っていたと認めた"]
+    },
+    { id:"d2", loc:"defendant", title:"被告人、姿を消す", sub:"「――ということですね」の男と共に",
+      body:[
+        "再度訪ねると、被告人はもぬけの殻だった。クローゼットの一部が空になっており、計画的に姿を消したような印象。管理人：「一時間ほど前、身なりの良いスーツ姿の方と、穏やかな様子で出て行かれるのを見ました。何か確認するように『――ということですね』と話しかけていたのを覚えています。」"
+      ],
+      evidence:["被告人は、『――ということですね』という話し方の男と共に、自らの意思とも取れる様子で姿を消した"]
+    },
+    { id:"e1", loc:"evening", title:"桐原の自宅", sub:"書きかけの手紙",
+      body:[
+        "桐原の妻：「主人は、判決の後から様子がおかしくなっていました。最近、『少し、遠くに出かけてくる』と、時々家を空けることがありました。」",
+        "書斎の引き出しに、書きかけの手紙：「――もし、この道を選んだことで、何か起きたとしても、それは俺自身の選択だ。お前たちを、巻き込むつもりはない。」宛先は書かれていない。"
+      ],
+      evidence:["桐原の書きかけの手紙に『この道を選んだことで、何か起きても、俺自身の選択だ』とあった"]
+    },
+    { id:"e2", loc:"evening", title:"裏路地の酒場", sub:"「審査は、無事通りましたので」",
+      body:[
+        "マスター：「桐原先生、月に一度くらい、お一人でいらしてましたが、最近は、お連れの方がいらっしゃることもありました。物腰の柔らかい、40代くらいの男性です。」",
+        "「お二人の会話、『審査は、無事通りましたので』というような言葉が、聞こえた気がします。」"
+      ],
+      evidence:["酒場のマスター：桐原の同伴者が『審査は、無事通りました』と話すのを聞いたと証言"]
+    },
+    { id:"e3", loc:"evening", title:"被告人の交友関係", sub:"紹介制の「投資クラブ」",
+      body:[
+        "判決後に増えた被告人の知人の一人：「彼とは、ある『投資クラブ』を通じて知り合いました。正式な名前は聞いたことがありませんが、紹介制で、かなり厳しい審査があると聞いています。会員には、何かの証のようなものが配られる、と噂で聞いたことがあります。」"
+      ],
+      evidence:["被告人は、紹介制で厳しい審査のある『投資クラブ』に加わっていたらしい"]
+    },
+    { id:"n1", loc:"night", title:"深夜の電話", sub:"「――ということですね」",
+      timeSlot:3, autoReveal:true,
+      body:[
+        "事務所に戻った三人のもとに、一件の着信が入る。非通知。応答すると、聞き覚えのない、しかし妙に落ち着いた声が、短くこう告げた。",
+        "「――そろそろ、そちらにも、お声がけする頃合いかと思いまして。ということですね。」通話は、それだけで切れた。"
+      ],
+      evidence:["深夜、非通知の電話から『――ということですね』という声で、意味深な言葉を告げられた"]
+    },
+  ],
+
+  closingVerdict: {
+    title: "夜は、まだ終わらない",
+    sub: "決着はつかなかった。だが、天秤会という影の輪郭が、初めて姿を見せ始めた。"
+  },
+  epilogue: {
+    intro: "被告人は姿を消し、桐原の死の真相は、まだ闇の中にある。だが、その闇の向こうに、「天秤会」と呼ぶべき何かの輪郭が、確かに浮かび上がってきた。",
+    characters: [
+      { who:"助手・石森隆一", text:"「無罪判決を出す度に、こうして目をつけられていたとしたら……法曹関係者にとって、これほど恐ろしい話はないと思います」と、険しい表情を見せた。" },
+      { who:"助手・水無瀬綾", text:"「『審査』『紹介制』……まるで、入会するみたいな言い方でした。桐原先生は、脅されていたんじゃなくて、自分から、その扉を叩いたのかもしれません」と、静かに呟いた。" },
+    ],
+    outro: "非通知の電話――「――ということですね」という声だけを残し、天秤会は、まだその全貌を見せない。次は、この事件そのものの真相と、佐伯と思われるその声の主を、追い詰めることになる。《前編・完》"
+  },
+};
+
+const nazotan2_ep1b = {
+  id: "tenbin-no-toki-go",
+  chapter: 3,
+  cover: "ntt1.jpg",
+  number: 2,
+  fileLabel: "なぞたん2 ―― 第一話〈後編〉",
+  title: "天秤の刻 —— 桐原法律事務所殺人事件〈後編〉",
+  subtitle: "桐原法律事務所〈なぞたん2・第一話 後編〉",
+  teaser: "「――ということですね」――正体不明の声の主を追い、天秤会という組織の輪郭に、初めて手が届く。だが、逃げ足も速い。",
+  status: "locked",
+  requiresUnlock: true,
+
+  prologueLede: "不穏な電話を最後に、前編は幕を閉じた。桐原は、天秤会という組織に自ら近づき、そして抜けようとしていたのではないか――そこまでの仮説を胸に、天才探偵たちは、被告人の行方と、「佐伯」と思われる人物の正体を追う。",
+  prologueParagraphs: [
+    "調べを進めるほど、事件は、単なる一件の殺人を超えて、政治や、司法そのものの奥深くにまで、根を張っていることが見えてくる。",
+    "だが今回、佐伯本人を捕らえることまでは、まだできない。取り逃した悔しさもまた、この事件が遺すものの一つになる。"
+  ],
+  cast: [
+    { id:"sabaeki", role:"「――ということですね」の声の主・天秤会の窓口", name:"佐伯（本名不明）" },
+    { id:"kensatsukan", role:"敗訴した検察官", name:"検察官" },
+    { id:"keieisha", role:"共同経営者", name:"共同経営者" },
+    { id:"izoku", role:"被害者遺族", name:"被害者遺族" },
+    { id:"hatori", role:"無罪判決を受けた被告人", name:"被告人" },
+  ],
+
+  locations: [
+    { id:"kiroku",   label:"桐原周りの記録の再捜査", timeSlot:0 },
+    { id:"bar2",     label:"酒場への再追及", timeSlot:0, unlockAfter:"kr4" },
+    { id:"giin",     label:"議員会館周辺", timeSlot:1 },
+    { id:"suujitsu", label:"数日後の調査", timeSlot:2 },
+    { id:"atochi",   label:"神代の旧事務所跡地", timeSlot:2, unlockAfter:"sj5" },
+    { id:"izoku2",   label:"被害者遺族への再訪", timeSlot:2, unlockAfter:"at3" },
+    { id:"shinnyuu", label:"発信エリアへ", timeSlot:3, unlockAfter:"iz2" },
+  ],
+
+  investigationBudget: 28,
+  unlockThreshold: 25,
+
+  clues: [
+    { id:"kr1", loc:"kiroku", title:"書きかけの手紙の鑑定", sub:"事件当日に書かれた",
+      body:[
+        "鑑定士：「インクの乾き具合から、この手紙は、事件のあった、まさにその日に書かれた可能性が高いです。筆跡にも、通常の桐原さんの字と比べて、明らかな緊張、あるいは強い決意のようなものが見て取れます。」"
+      ],
+      evidence:["桐原の書きかけの手紙は、事件当日に書かれたものと判明した"]
+    },
+    { id:"kr2", loc:"kiroku", title:"携帯電話の通信記録", sub:"非通知の10分間通話",
+      body:[
+        "事件当日の夕方、非通知の番号から、10分近い通話記録。その直前、桐原は弁護士会の懲戒請求窓口に、『組織的な不正行為に関与している可能性がある場合の、内部通報の手続きについて』という問い合わせを、2分ほど行っていた。"
+      ],
+      evidence:["桐原は事件当日、弁護士会に内部通報の手続きを問い合わせた直後、非通知の電話を10分近く受けていた"]
+    },
+    { id:"kr3", loc:"kiroku", title:"事務所の固定電話記録", sub:"酒場への発信",
+      body:[
+        "事務所の固定電話の履歴を確認すると、非通知電話とほぼ同時刻に、事務所の固定電話から、桐原がよく通っていた裏路地の酒場へ、一件の発信記録があった。"
+      ],
+      evidence:["事務所の固定電話から、桐原がよく訪れていた酒場へ発信された記録があった"]
+    },
+    { id:"kr4", loc:"kiroku", title:"防犯カメラと死角", sub:"照明の明滅と裏階段",
+      body:[
+        "事件当夜21時頃、桐原が一人で入るところまでは通常通り。だが22時15分頃、一瞬だけ照明が明滅する様子が映り込んでいる。所長室に繋がる裏階段は、清掃業者用でカメラの死角になっていた。",
+        "死亡推定時刻との整合性から、犯人はこの死角を使って出入りしていた可能性が高い――つまり、事務所の内部事情に詳しい人物、あるいは一度以上訪れたことのある人物と推測される。"
+      ],
+      evidence:["事務所には裏階段の死角があり、22時15分頃に照明が不自然に明滅していた"]
+    },
+    { id:"br1", loc:"bar2", title:"酒場マスターの証言：発信の経緯", sub:"「今夜、来られますか」",
+      body:[
+        "マスター：「あの晩、事務所から電話がかかってきました。桐原先生の声で『今夜、来られますか』と。いつもと違って、切羽詰まった声色でした。お連れの方に連絡すると、『分かりました。今夜、伺います』と。」"
+      ],
+      evidence:["酒場マスター：桐原が切迫した様子で佐伯への連絡を依頼していたと証言"]
+    },
+    { id:"br2", loc:"bar2", title:"裏階段の合鍵", sub:"以前から借りていた",
+      body:[
+        "マスター：「その方は、少し前にも一度、うちの店で待ち合わせに使わせてほしいと、事務所の裏階段の合鍵を、桐原先生から借りていたことがあったんです。『清掃業者用の入り口を使えば、目立たずに話せるから』と。」",
+        "「一度だけ、桐原先生が『佐伯さん』とお呼びになっていたのを、聞いた覚えがあります。」"
+      ],
+      evidence:["『佐伯』と呼ばれる人物は、以前から裏階段の合鍵を借りており、事件当夜も使用した可能性が高い"]
+    },
+    { id:"gi1", loc:"giin", title:"喫茶店マスターの証言", sub:"議員との名刺交換",
+      body:[
+        "議員会館近くの喫茶店マスター：「その方でしたら、月に何度か、お一人でいらっしゃいますね。一度、議員さんらしき方と名刺交換をされているのを見かけたことがあります。議員さんの方が、深々と頭を下げていらっしゃいました。」"
+      ],
+      evidence:["佐伯と思われる人物は、議員会館近くの喫茶店で、議員と名刺交換していた"]
+    },
+    { id:"gi2", loc:"giin", title:"警備員の証言：桑名議員", sub:"記録に残らない出入り",
+      body:[
+        "警備員：「その特徴の方、見覚えがあります。正式な訪問者名簿には、記録が残らない形での出入りが多い方でした。議員先生ご本人が直接お迎えに出られて、そのまま奥へご案内することもあるんです。……法務委員会にいらっしゃる、桑名先生だったと思います。」"
+      ],
+      evidence:["佐伯は、法務委員会所属の桑名議員と、記録に残らない形で頻繁に接触していた"]
+    },
+    { id:"gi3", loc:"giin", title:"資金調査の依頼", sub:"専門家へ",
+      body:[
+        "被告人が関わっていた「投資クラブ」の実態解明のため、専門家に正式な資金調査を依頼した。「かなり複雑に、資金洗浄めいた経路を辿っているようです。時間はかかりますが、必ず追ってみせます」との回答。"
+      ],
+      evidence:["投資クラブの資金の流れについて、専門家に正式な調査を依頼した"]
+    },
+    { id:"sj1", loc:"suujitsu", title:"自動報告：石森より（佐伯の正体）", sub:"偽名・通り名の可能性",
+      timeSlot:2, autoReveal:true,
+      body:[
+        "石森：「『佐伯』という名前自体は、おそらく偽名か、通り名のようなものだという感触を得ています。少なくとも、正式に弁護士登録や、関連業界に籍を置いている『佐伯』という人物は、見当たりませんでした。」"
+      ],
+      evidence:["『佐伯』という名前は、正式な登録の見当たらない、偽名・通り名の可能性が高い"]
+    },
+    { id:"sj2", loc:"suujitsu", title:"自動報告：水無瀬より（投資クラブの実態）", sub:"ペーパーカンパニー",
+      timeSlot:2, autoReveal:true,
+      body:[
+        "水無瀬：「表向きの登記情報を辿ると、実体のはっきりしないペーパーカンパニーに行き着きました。ただ、資金の流れや、本当の運営者までは、正直、私たちだけでは追いきれませんでした。」"
+      ],
+      evidence:["被告人の『投資クラブ』は、実体のはっきりしないペーパーカンパニーだった"]
+    },
+    { id:"sj3", loc:"suujitsu", title:"資金調査の続報", sub:"無罪判決者たちの出資",
+      body:[
+        "専門家：「出資者リストの一部が判明しました。複数の『無罪判決を受けた人物』の名前が含まれています。」――見逃してもらう代わりに、資金を提供している構図が浮かび上がる。"
+      ],
+      evidence:["投資クラブへの出資者に、複数の無罪判決者の名前があった"]
+    },
+    { id:"sj4", loc:"suujitsu", title:"議事録調査：桑名議員の過去", sub:"「法の限界」への問題意識",
+      body:[
+        "公開議事録を確認すると、数年前、刑事訴訟法の改正案に強く反対していた記録が見つかる。「証拠開示のルールが緩和されれば、冤罪も、逆に真犯人の見逃しも、両方増えかねない」という主張。",
+        "法律の穴を誰よりも理解している人物だからこそ、天秤会の理屈に、個人的な共感を抱いていた可能性が浮かぶ。"
+      ],
+      evidence:["桑名議員は、過去に『法の限界』への強い問題意識を公の場で示していた"]
+    },
+    { id:"sj5", loc:"suujitsu", title:"資料室：桐原の他の調査ファイル", sub:"5年前まで遡る痕跡",
+      body:[
+        "パラリーガルの協力で、金庫にあった非公式ファイルを精査。過去5年ほどの間、複数の無罪判決について、桐原が独自に洗い直していた記録が見つかる。どのファイルにも『判決後、被告人の生活が急に豊かになる』という共通点。",
+        "一番古いファイルの日付は5年前。隅に桐原の走り書き：「この一件だけは、どうしても引っかかる。当時の担当弁護士は、確か……独立して間もない、若い先生だった。」"
+      ],
+      evidence:["天秤会らしき活動の痕跡は、少なくとも5年前から存在していた"]
+    },
+    { id:"sj6", loc:"suujitsu", title:"弁護士会：神代の記録", sub:"半年前に登録抹消",
+      body:[
+        "弁護士会職員：「該当する方、おそらく神代先生かと。半年ほど前、突然、弁護士登録を抹消されています。理由は『一身上の都合』とだけ。事務所も引き払われ、現在の所在は把握しておりません。」",
+        "法務局で当時の裁判記録を確認すると、5年前の一番古いファイルの担当弁護士は、まさにこの神代だったと判明する。"
+      ],
+      evidence:["5年前の事件の担当弁護士は神代であり、半年前に弁護士登録を抹消していた"]
+    },
+    { id:"sj7", loc:"suujitsu", title:"神代の元同僚の証言", sub:"「取り返しのつかないことに」",
+      body:[
+        "元同僚：「真面目で、正義感の強い男でした。半年前、急に『もう、この仕事は続けられない』と言い出して。理由は話してくれませんでしたが、ただ一言、『自分は、取り返しのつかないことに、手を貸してしまった』と。」"
+      ],
+      evidence:["神代の元同僚：神代が『取り返しのつかないことに手を貸した』と悔いていたと証言"]
+    },
+    { id:"sj8", loc:"suujitsu", title:"神代の実家への確認", sub:"「もう少しで、終わらせられる」",
+      body:[
+        "神代の母親：「息子とは、半年ほど、まともに連絡が取れていません。時々、生きていることだけを知らせるような、短いメッセージが届くくらいで。最近届いたメッセージには、『もう少しで、終わらせられると思う』と、書かれていました。」",
+        "通信会社への正式照会により、この最後のメッセージの発信エリアが、桐原法律事務所から電車で二駅ほどの、古い雑居ビルが密集するエリアだと判明する。"
+      ],
+      evidence:["神代の最後のメッセージは『もう少しで、終わらせられる』というもので、発信エリアが判明した"]
+    },
+    { id:"at1", loc:"atochi", title:"神代の旧事務所跡地", sub:"急いで運び出された形跡",
+      body:[
+        "小さな雑居ビルの一室。清掃が行き届いておらず、荷物を急いで運び出したような形跡。壁の隅に、剥がし忘れたと思われるメモが一枚：「確認済み：09、11、14」。"
+      ],
+      evidence:["神代の旧事務所に『確認済み：09、11、14』というメモが残されていた"]
+    },
+    { id:"at2", loc:"atochi", title:"差出人不明の封筒", sub:"「14」の刻印とブローチ",
+      body:[
+        "郵便受けに、差出人不明の封筒。中には「14」という刻印入りの天秤のブローチと、短い書き置き：「神代くんへ。まだ、間に合う。戻ってくるなら、今のうちだ。」署名はない。",
+        "水無瀬：「これ、佐伯の話し方とは、また筆跡の癖が違う気がします。天秤会には、複数の『窓口』がいるのかもしれません。」"
+      ],
+      evidence:["神代宛てに、『14』のブローチと引き止める書き置きが届いていた（佐伯とは別の人物からの可能性）"]
+    },
+    { id:"at3", loc:"atochi", title:"酒場の常連客の証言", sub:"佐伯の言葉と対立",
+      body:[
+        "常連客A：「佐伯さんが、若い弁護士らしき方と、激しい言い合いをしているのを見たことがあります。『あなた方のやり方は、行き過ぎだ』『これ以上は、協力できない』と。」",
+        "常連客B：「佐伯さんが、以前こう仰っていました。『私たちは、法律の外にいるわけじゃない。法律が、追いついていないだけです』と。どこか、迷いながら言っているような響きもありました。」"
+      ],
+      evidence:["佐伯は、過去に若い弁護士（神代と推測される）と、組織のやり方を巡って対立していた"]
+    },
+    { id:"iz1", loc:"izoku2", title:"遺族への再訪：事後の連絡", sub:"「問題は、解決しました」",
+      body:[
+        "遺族：「桐原先生が亡くなった、少し後です。佐伯さんと思われる人物から、『判決は、正しい形に修正されました。もう、大丈夫です』と連絡がありました。……正直、少しだけ安堵してしまった自分がいて、それが、恐ろしくなりました。」"
+      ],
+      evidence:["佐伯は、桐原殺害後、遺族に『問題は解決した』と連絡していた"]
+    },
+    { id:"iz2", loc:"izoku2", title:"「組織の体制が変わる」という発言", sub:"引き継ぎを思わせる言い方",
+      body:[
+        "遺族：「電話の最後に、こう言っていました。『次は、もう少し、丁寧にお伝えできると思います。組織の体制が、変わりますので』と。なんだか、引き継ぎのような話し方だった気がします。」"
+      ],
+      evidence:["佐伯は『組織の体制が変わる』という、引き継ぎを思わせる発言をしていた"]
+    },
+    { id:"sn1", loc:"shinnyuu", title:"不審な明かりのビル", sub:"言い争う声",
+      body:[
+        "発信エリアの雑居ビルを一棟ずつ確認するうち、テナント募集中のはずの階に、明かりが灯っているビルを発見。中から、言い争うような声が聞こえてくる。"
+      ],
+      evidence:["発信エリアの雑居ビルの一室に、不審な明かりと言い争う声があった"]
+    },
+    { id:"sn2", loc:"shinnyuu", title:"踏み込み、そして佐伯の逃走", sub:"「――ということですね」の声",
+      body:[
+        "ドアを開けると、痩せた憔悴した様子の神代が、壁際に追い詰められていた。向き合う男の声には、聞き覚えがあった――「――ということですね」。",
+        "「動くな」と告げると、男はわずかに驚き、「ずいぶんと、早くたどり着かれましたね」とだけ言い残し、非常口から逃走。追跡は及ばなかった。"
+      ],
+      evidence:["現場で佐伯本人と接触したが、逃走を許した"]
+    },
+    { id:"sn3", loc:"shinnyuu", title:"神代が持っていた録音データ", sub:"佐伯自身の自供",
+      body:[
+        "神代：「佐伯に、消されそうになっていました。僕が、組織の証拠を集めていることに、気づかれていたんです。」震える手で、ICレコーダーを取り出す。",
+        "録音（佐伯の声）：「ええ、桐原さんの件は、私が処理しました。彼は、組織の秘密を、外に漏らそうとしていましたから。あなたも、同じ道を選ぶなら、同じ結末が待っていますよ。」――佐伯自身の声による、動かぬ自供だった。"
+      ],
+      evidence:["神代が録音していた音声に、佐伯自身による桐原殺害の自供が記録されていた"]
+    },
+    { id:"sn4", loc:"shinnyuu", title:"神代の告白：天秤会との出会い", sub:"5年前の後悔",
+      body:[
+        "神代：「5年前、僕が担当した無罪判決……証拠不十分で無罪になった被告人が、その後、別の事件を起こしたんです。自分の弁護が、次の被害者を生んでしまった。そんな時に、佐伯が接触してきました。」",
+        "「最初は、法で裁ききれない悪人の情報を集めるだけの仕事でした。でも次第に、対象者への直接的な『処罰』の実行に関わる人間が出てきて……気づけば、僕自身も、間接的に、何人かの処罰に加担してしまっていました。」"
+      ],
+      evidence:["神代：5年前の後悔をきっかけに天秤会に接触し、次第に処罰の実行に加担してしまったと告白"]
+    },
+    { id:"sn5", loc:"shinnyuu", title:"神代の告白：組織の構造", sub:"番号システムと佐伯の立場",
+      body:[
+        "神代：「あの番号は、加入順を示す通し番号です。僕は『03』でした。桐原先生は『08』。佐伯は、番号を持っていません。彼は、メンバーというより、組織の『運営側』の人間――勧誘や管理を担う立場です。」",
+        "「組織の頂点にいる人物については、僕も知りません。ただ、佐伯より、さらに上の存在がいることは、間違いないと思います。佐伯自身、時々、誰かに『報告』しているような素振りを見せていましたから。」"
+      ],
+      evidence:["神代：ブローチの番号は加入順、佐伯は番号を持たない運営側の人間だと証言","神代：佐伯よりさらに上の存在がいると証言"]
+    },
+    { id:"sn6", loc:"shinnyuu", title:"神代の決意", sub:"「唯一の償い」",
+      body:[
+        "神代：「僕は、もう十分すぎるほど、罪を重ねました。この録音データと、僕が知っていることすべてを、正式に証言します。それが、僕にできる、唯一の償いだと思うので。」"
+      ],
+      evidence:["神代は、録音データと自身の証言を、正式に提供することを決意した"]
+    },
+  ],
+
+  q1Label: "桐原を殺害したのは誰か。",
+  q1Hint: "実行犯自身が、まだ本名すら分かっていません。声と証言から絞り込んでください。",
+  questions: {
+    q2: [
+      { id:"a", label:"以前から借りていた裏階段の合鍵を使い、事件当夜、桐原本人に呼び出される形で所長室に出入りし、毒物を用いて殺害した" },
+      { id:"b", label:"検察官が、判決への私怨から手を下した" },
+      { id:"c", label:"共同経営者が、経営難を理由に手を下した" },
+      { id:"d", label:"被害者遺族が、判決への恨みから手を下した" },
+    ],
+    q3: [
+      { id:"a", label:"桐原が内部通報を決意し、組織の秘密を外部に漏らそうとしたための口封じ" },
+      { id:"b", label:"桐原個人への私的な怨恨" },
+      { id:"c", label:"報酬を巡るトラブル" },
+      { id:"d", label:"弁護士会内部の派閥争い" },
+    ],
+  },
+  correct: { q1:["sabaeki"], q2:"a", q3:"a" },
+
+  resultVerdict: {
+    title: "真相には辿り着いた —— だが、佐伯は逃げた",
+    sub: "録音という動かぬ証拠を手にした。だが、実行犯本人は、まだ闇の中にいる。"
+  },
+
+  solutionSections: [
+    { title:"第一部　内部通報という決断",
+      html:"桐原は、事件当日、弁護士会に内部通報の手続きを問い合わせていた。その直後に受けた非通知の電話が、命取りになった。事務所の裏階段――防犯カメラの死角――が、犯行の経路として使われていた。" },
+    { title:"第二部　声の主",
+      html:"『佐伯』という名前は、正式な登録の見当たらない偽名だった。議員会館への出入り、法務委員会所属・桑名議員との接点――天秤会は、司法と政治の狭間にまで、静かに根を張っていた。" },
+    { title:"第三部　5年前からの糸",
+      html:"弁護士・神代は、5年前の後悔をきっかけに天秤会へ接触し、後に組織のやり方に疑問を持って離反しようとしていた。彼が独自に集めていた証拠――番号システム、そして佐伯自身の自供を含む録音――が、事件の核心を明らかにした。" },
+    { title:"第四部　取り逃した影",
+      html:"神代の救出には成功し、佐伯自身の声による決定的な自供も手に入れた。だが、佐伯本人は、間一髪のところで逃走した。<strong>『組織の体制が変わる』という言葉の意味も、佐伯よりさらに上にいるという存在の正体も、まだ分からないままだ。</strong>" },
+  ],
+  evidenceTable: [
+    ["1","裏階段の合鍵と防犯カメラの死角","佐伯の犯行機会の裏付け"],
+    ["2","議員会館での接触記録","天秤会と桑名議員の繋がりの発覚"],
+    ["3","神代の旧事務所のブローチとメモ","天秤会の番号システムの発覚"],
+    ["4","神代が録音していた、佐伯自身の自供","桐原殺害の決定的な物証"],
+    ["5","神代の証言（番号システム、佐伯の立場）","組織構造の一端の解明"],
+  ],
+  epilogue: {
+    intro: "神代は、無事に保護された。彼の証言と録音データにより、佐伯という人物による桐原殺害の構図は、ほぼ確定した。だが、その身柄は、まだ捕らえられていない。",
+    characters: [
+      { who:"神代", text:"正式な証言者として、事件の全容解明に協力することを約束した。「これが、僕にできる、唯一の償いです」と、静かに語った。" },
+      { who:"助手・石森隆一", text:"「佐伯を取り逃したのは、悔しいです。……でも、神代さんを救えたことは、決して小さな成果じゃないと思います」と、前を向いた。" },
+      { who:"助手・水無瀬綾", text:"「桑名議員、天秤会の頂点……まだ見えていないものが、たくさんあります。次は、必ず」と、拳を握りしめた。" },
+    ],
+    outro: "天秤会――法で裁けない者を、独自の正義で裁くという、歪んだ筋の通った組織。その最初の輪郭に触れた事件は、こうして幕を閉じる。だが、これは始まりに過ぎない。《第一話・完》"
+  },
+  redHerrings: [
+    "検察官・共同経営者・被害者遺族への疑い：それぞれ動機はあったが、直接の実行への関与は認められなかった。",
+    "被告人の失踪：拉致ではなく、組織側に取り込まれた結果である可能性が高い。",
+  ]
+};
+
+const episodes = [ episode1, episode2, episode3, episode4, episode5, episode6, episode7, episode8, episode9, episode10, episode11, episode12, episode13, gaiden1, gaiden2, gaiden3, nazotan2_ep1a, nazotan2_ep1b ];
 
 
 
@@ -5473,6 +5931,7 @@ let confrontStage = "question"; // "question" | "hit" | "gameover" | "confession
 let confrontLog = [];
 let decisionChoices = {}; // clueId -> chosen choice index (for resolved decision clues)
 let investigationFlags = {}; // arbitrary story flags set by decision choices
+let currentTimeIndex = 0; // index into currentEpisode.timeSlots, if the episode uses the time system
 
 /* ========================================================================
    SILHOUETTE FILES (灯影会ファイル)
@@ -5618,6 +6077,7 @@ const CHAPTER_INFO = {
   1: { label:"第一章", title:"灯る前の夜" },
   "1.5": { label:"外伝", title:"石森隆一の道行き" },
   2: { label:"第二章", title:"灯影を追う者たち" },
+  3: { label:"なぞたん2", title:"天秤の刻" },
 };
 
 let activeChapterKey = null;
@@ -5702,7 +6162,9 @@ function loadEpisode(ep){
   decisionChoices = {};
   investigationFlags = {};
   usingPartialConfrontation = false;
+  currentTimeIndex = 0;
   currentLoc = ep.locations[0].id;
+  if(ep.timeSlots) applyAutoRevealsForCurrentTime();
 
   document.getElementById("epCrumb").style.display = "inline-block";
   document.getElementById("phaseRail").style.display = "flex";
@@ -5850,6 +6312,7 @@ function renderTabs(){
   wrap.innerHTML = "";
   ep.locations.forEach(loc=>{
     if(loc.unlockAfter && !openedClues.has(loc.unlockAfter)) return; // not yet unlocked — stay hidden
+    if(loc.timeSlot !== undefined && currentTimeIndex < loc.timeSlot) return; // not open at this time of day yet
     const total = ep.clues.filter(c=>c.loc===loc.id).length;
     const done = ep.clues.filter(c=>c.loc===loc.id && openedClues.has(c.id)).length;
     const el = document.createElement("div");
@@ -5866,18 +6329,19 @@ function renderClues(){
   wrap.innerHTML = "";
   const exhausted = cluesUsed >= ep.investigationBudget;
   ep.clues.filter(c=>c.loc===currentLoc).forEach(c=>{
+    if(c.timeSlot !== undefined && currentTimeIndex < c.timeSlot) return; // not available at this time of day yet
     if(c.type === "decision"){
       wrap.appendChild(renderDecisionCard(c));
       return;
     }
     const isOpen = openedClues.has(c.id);
-    const isLocked = !isOpen && exhausted;
+    const isLocked = !isOpen && exhausted && !c.autoReveal;
     const card = document.createElement("div");
-    card.className = "clue-card" + (isLocked ? " locked-out" : "");
+    card.className = "clue-card" + (isLocked ? " locked-out" : "") + (c.autoReveal ? " auto-report" : "");
     card.innerHTML = `
       <div class="clue-head" onclick="toggleClue('${c.id}')">
         <div>
-          <div class="clue-title display">${c.title}</div>
+          <div class="clue-title display">${c.autoReveal ? "📨 " : ""}${c.title}</div>
           <div class="clue-sub">${c.sub}</div>
         </div>
         <div class="clue-mark ${isOpen?'':'unread'}">${isOpen ? '確認済み' : (isLocked ? '捜査打ち切り' : '未確認')}</div>
@@ -5972,30 +6436,88 @@ function toggleClue(id){
   const ep = currentEpisode;
   const wasOpen = openedClues.has(id);
   const bodyEl = document.getElementById("body-"+id);
+  const clueDef = ep.clues.find(c=>c.id===id);
   if(wasOpen){
     bodyEl.classList.remove("open");
   } else {
-    if(cluesUsed >= ep.investigationBudget){
-      flashBudgetWarning();
-      return;
+    if(!clueDef.autoReveal){
+      if(cluesUsed >= ep.investigationBudget){
+        flashBudgetWarning();
+        return;
+      }
+      cluesUsed++;
     }
-    cluesUsed++;
     openedClues.add(id);
-    const clue = ep.clues.find(c=>c.id===id);
-    clue.evidence.forEach(e=>{
+    clueDef.evidence.forEach(e=>{
       if(!collectedEvidence.includes(e)) collectedEvidence.push(e);
     });
-    if(clue.silhouette){
-      saveSilhouetteFragment(clue.silhouette, ep.title);
+    if(clueDef.silhouette){
+      saveSilhouetteFragment(clueDef.silhouette, ep.title);
       renderSilhouetteBadge();
     }
     bodyEl.classList.add("open");
+    if(clueDef.advancesTimeOnOpen && ep.timeSlots){
+      advanceTime();
+      return;
+    }
     renderNotebook();
     renderTabs();
     renderClues(); // re-render so any now-exhausted cards lock visually
     checkDeductionUnlock();
     return;
   }
+  checkDeductionUnlock();
+}
+
+/* ========================================================================
+   TIME OF DAY SYSTEM
+   ------------------------------------------------------------------------
+   Opt-in per episode via ep.timeSlots (e.g. ["朝","昼","夕方","夜"]).
+   Locations/clues can require a currentTimeIndex via `timeSlot`. Clues
+   marked `autoReveal:true` are teammate reports: free (no budget cost),
+   and appear automatically once time reaches their `timeSlot` — no click
+   needed to "find" them, though the player still opens the card to read it.
+   Clues marked `advancesTimeOnOpen:true` push time forward once read.
+   ======================================================================== */
+function applyAutoRevealsForCurrentTime(){
+  const ep = currentEpisode;
+  if(!ep || !ep.clues) return;
+  ep.clues.forEach(c=>{
+    if(c.autoReveal && c.timeSlot !== undefined && c.timeSlot <= currentTimeIndex && !openedClues.has(c.id)){
+      openedClues.add(c.id);
+      c.evidence.forEach(e=>{ if(!collectedEvidence.includes(e)) collectedEvidence.push(e); });
+    }
+  });
+}
+
+function renderTimeIndicator(){
+  const ep = currentEpisode;
+  const wrap = document.getElementById("timeIndicatorWrap");
+  if(!wrap) return;
+  if(!ep || !ep.timeSlots){
+    wrap.style.display = "none";
+    return;
+  }
+  wrap.style.display = "flex";
+  const atEnd = currentTimeIndex >= ep.timeSlots.length-1;
+  wrap.innerHTML = `
+    <div class="time-slots">
+      ${ep.timeSlots.map((t,i)=>`<span class="time-slot ${i===currentTimeIndex?'active':''} ${i<currentTimeIndex?'past':''}">${t}</span>`).join("")}
+    </div>
+    <button class="btn ghost time-advance-btn" onclick="advanceTime()" ${atEnd ? "disabled" : ""}>${atEnd ? "夜が更けた" : "時間を進める →"}</button>
+  `;
+}
+
+function advanceTime(){
+  const ep = currentEpisode;
+  if(!ep.timeSlots) return;
+  if(currentTimeIndex >= ep.timeSlots.length-1) return;
+  currentTimeIndex++;
+  applyAutoRevealsForCurrentTime();
+  renderTimeIndicator();
+  renderTabs();
+  renderClues();
+  renderNotebook();
   checkDeductionUnlock();
 }
 
@@ -6087,7 +6609,7 @@ function goPhase(n){
     p.classList.toggle("done", pn<n);
   });
   window.scrollTo({top:0, behavior:"smooth"});
-  if(n===1){ renderTabs(); renderClues(); renderNotebook(); checkDeductionUnlock(); }
+  if(n===1){ renderTabs(); renderClues(); renderNotebook(); renderTimeIndicator(); checkDeductionUnlock(); }
   if(n===2){ renderDeduction(); }
   if(n===3){ renderConfrontation(); }
 }
