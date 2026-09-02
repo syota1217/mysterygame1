@@ -401,6 +401,47 @@
   .confront-bubble.detective .cb-name{ color:var(--gold); }
   .confront-round{ margin-top:6px; }
   .confront-round-num{ text-align:center; font-size:11px; letter-spacing:.15em; color:var(--gold); margin-bottom:14px; text-shadow:0 0 10px rgba(185,146,79,0.3); }
+  .debate-statements{ display:flex; flex-direction:column; gap:14px; margin:18px 0; }
+  .debate-bubble{
+    max-width:88%; background:linear-gradient(155deg, rgba(143,42,53,0.14), var(--panel));
+    border:1px solid var(--crimson); border-radius:18px; padding:14px 20px;
+    font-size:14px; color:var(--paper); cursor:pointer;
+    transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .debate-bubble:nth-child(odd){ align-self:flex-start; border-bottom-left-radius:4px; }
+  .debate-bubble:nth-child(even){ align-self:flex-end; text-align:right; border-bottom-right-radius:4px; }
+  .debate-bubble .cb-name{ display:block; font-size:10.5px; letter-spacing:.1em; color:var(--crimson-bright); margin-bottom:4px; }
+  .debate-bubble:hover{ border-color:var(--gold); transform:scale(1.015); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
+  .debate-bubble.wrong-flash{ animation:debateShake .4s ease; }
+  @keyframes debateShake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-8px); border-color:var(--crimson-bright); }
+    40%{ transform:translateX(7px); }
+    60%{ transform:translateX(-5px); }
+    80%{ transform:translateX(4px); }
+  }
+  .debate-bubble.shatter{
+    animation:debateShatter .42s ease forwards;
+    border-color:var(--gold); box-shadow:0 0 30px rgba(185,146,79,0.5);
+  }
+  @keyframes debateShatter{
+    0%{ transform:scale(1); opacity:1; filter:brightness(1); }
+    30%{ transform:scale(1.06); filter:brightness(1.6); }
+    100%{ transform:scale(0.85) rotate(4deg); opacity:0; filter:brightness(2); }
+  }
+  .weakpoint-flash{
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0.8);
+    font-family:'Shippori Mincho',serif; font-size:clamp(28px,6vw,44px); font-weight:800;
+    letter-spacing:.12em; color:var(--gold-bright); text-shadow:0 0 24px rgba(185,146,79,0.8), 0 0 60px rgba(185,146,79,0.4);
+    z-index:9990; pointer-events:none;
+    animation:weakpointPop .5s cubic-bezier(.2,.9,.3,1.2) forwards;
+  }
+  @keyframes weakpointPop{
+    0%{ opacity:0; transform:translate(-50%,-50%) scale(0.6) rotate(-3deg); }
+    35%{ opacity:1; transform:translate(-50%,-50%) scale(1.12) rotate(1deg); }
+    60%{ transform:translate(-50%,-50%) scale(1) rotate(0deg); }
+    100%{ opacity:0; transform:translate(-50%,-50%) scale(1.05) rotate(0deg); }
+  }
   .confront-prompt{ text-align:center; font-size:13px; color:var(--ink-dim); margin:18px 0 12px; }
   .eopt-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   @media(max-width:600px){ .eopt-grid{ grid-template-columns:1fr; } }
@@ -5451,7 +5492,7 @@ const gaiden3 = {
         "タエ：「あの子が、どんな道を歩んできたのか、私には分かりません。ですが、もし本当に、村に良くない影を落とす存在になっているのだとしたら……隆一さん。天才探偵さんと、水無瀬さんに、このことを、ちゃんと伝えてください。あの子のためにも、村のためにも。」",
         "石森：「タエさん。ありがとうございます。……必ず、伝えます。」"
       ],
-      evidence:["タエ：石森に、東雲と水無瀬へこの件を伝えるよう託した"]
+      evidence:["タエ：石森に、東雲先生と水無瀬へこの件を伝えるよう託した"]
     },
   ],
 
@@ -5465,7 +5506,7 @@ const gaiden3 = {
       { who:"タエ", text:"石森を見送りながら、静かに手を合わせた。「山神様も、あんたのことを、ずっと見守ってくださるでしょう。……気をつけて、行ってらっしゃい。」" },
       { who:"大樹・航", text:"石森の旅立ちを、村の入り口まで見送った。「また、いつでも帰ってきてください」と、二人は口を揃えて言った。" },
     ],
-    outro: "石森は、村を出るバスの中、手帳に名刺の内容を書き写しながら、静かに決意する。「東雲さん、水無瀬さん――この情報を、必ず届けます。」その決意は、やがて、灯影会との最終決戦（File No.13）へと繋がっていくことになる。《外伝「石森隆一の道行き」・完》"
+    outro: "石森は、村を出るバスの中、手帳に名刺の内容を書き写しながら、静かに決意する。「先生、水無瀬さん――この情報を、必ず届けます。」その決意は、やがて、灯影会との最終決戦（File No.13）へと繋がっていくことになる。《外伝「石森隆一の道行き」・完》"
   },
 };
 
@@ -5911,7 +5952,487 @@ const nazotan2_ep1b = {
   ]
 };
 
-const episodes = [ episode1, episode2, episode3, episode4, episode5, episode6, episode7, episode8, episode9, episode10, episode11, episode12, episode13, gaiden1, gaiden2, gaiden3, nazotan2_ep1a, nazotan2_ep1b ];
+const nazotan2_ep2a = {
+  id: "itsuwari-no-tenbin-zen",
+  chapter: 3,
+  cover: "ntt2.jpg",
+  number: 3,
+  fileLabel: "なぞたん2 ―― 第二話〈前編〉",
+  title: "偽りの天秤 —— 元刑事・武藤殺人事件〈前編〉",
+  subtitle: "武藤邸・警備会社事務所〈なぞたん2・第二話 前編〉",
+  teaser: "自宅の書斎で発見された元刑事。だが実行現場は別にあった。デスクに置かれた天秤のブローチは、果たして本物か。",
+  status: "locked",
+  requiresUnlock: true,
+  investigationOnly: true,
+
+  prologueLede: "元刑事・武藤誠一郎(65)が、自宅の書斎で遺体となって発見された。第一発見者は妻の佳代。デスクには、天秤を象ったブローチと「あなたの罪は、忘れられていない」という警告文めいたメモが残されていた。",
+  prologueParagraphs: [
+    "だが、争いの形跡は薄く、凶器も見当たらない。外出着のまま椅子に座った遺体、絨毯に残る引きずった跡――どうやら、ここは発見現場に過ぎず、真の実行現場は、別の場所にあるらしい。",
+    "武藤には、数年前、有力者の関係する事件で証拠を握りつぶし、真犯人を見逃していたという過去があった。東雲先生、石森隆一、水無瀬綾――3人は、その過去と、事件の関係者たちの思惑を、丁寧に解きほぐしていくことになる。"
+  ],
+  cast: [],
+
+  locations: [
+    { id:"jitaku",     label:"自宅・書斎", timeSlot:0 },
+    { id:"jitaku_kayo", label:"妻・佳代への聞き込み", timeSlot:0, unlockAfter:"j4" },
+    { id:"jimusho",    label:"警備会社事務所", timeSlot:1 },
+    { id:"kikitori",   label:"関係者への聞き込み", timeSlot:1, unlockAfter:"jm4" },
+    { id:"alibi",      label:"アリバイの裏付け", timeSlot:2, unlockAfter:"kk8" },
+    { id:"shibasaki2", label:"芝崎への追及", timeSlot:2, unlockAfter:"al3" },
+    { id:"yakan",      label:"夜の事務所周辺", timeSlot:3 },
+    { id:"saitsuikyu", label:"神崎・三雲への再追及", timeSlot:3, unlockAfter:"yk3" },
+  ],
+
+  investigationBudget: 30,
+  unlockThreshold: 27,
+
+  clues: [
+    { id:"j1", loc:"jitaku", title:"発見時の状況", sub:"書斎の椅子で",
+      body:[
+        "朝、いつまでも起きてこない武藤を心配した妻・佳代が、書斎を覗いたところで発見。椅子にもたれかかるように座った状態で、死因は後頭部への鈍器による打撲と見られる。",
+        "書斎には、それらしき凶器が見当たらない。争った形跡もほとんどなく、武藤は寝間着ではなく、きちんとした外出着のまま座っていた。"
+      ],
+      evidence:["武藤は書斎で発見されたが、争いの形跡が薄く、凶器も見当たらなかった"]
+    },
+    { id:"j2", loc:"jitaku", title:"絨毯の引きずり跡", sub:"入り口から椅子まで",
+      body:[
+        "書斎の入り口から、椅子の位置まで、うっすらと何かを引きずったような跡が続いている。跡の幅や深さから、成人男性一人を引きずるようにして運んだと推測される。"
+      ],
+      evidence:["絨毯に、遺体が外部から運び込まれたことを示す引きずり跡があった"]
+    },
+    { id:"j3", loc:"jitaku", title:"デスクの上のブローチとメモ", sub:"「あなたの罪は、忘れられていない」",
+      body:[
+        "天秤を象った小さなブローチと、印字されたメモが一枚。「あなたの罪は、忘れられていない。」とだけ書かれている。デスクの上に、わざわざ正面を向けて、几帳面に配置されていた。"
+      ],
+      evidence:["デスクに、天秤のブローチと警告文めいたメモが、見せつけるように置かれていた"]
+    },
+    { id:"j4", loc:"jitaku", title:"施錠状況と侵入の痕跡", sub:"内側から施錠、しかし",
+      body:[
+        "玄関・窓は、すべて内側から施錠されており、一見すると外部からの侵入の形跡はない。だが、椅子の脚に微かな擦り傷があり、椅子ごと位置がずらされた形跡がある。",
+        "窓の鍵にも、微かな金属の擦れた跡。石森：「これ、外から特殊な工具で、鍵を操作した跡に見えます。古いタイプの窓の鍵だと、稀に、こういう手口が使えることがあるんです。」",
+        "玄関マットの下からは、使用された形跡のある合鍵が一つ、隠されているのが見つかった。"
+      ],
+      evidence:["窓の鍵に外部から工具で操作された跡があり、玄関マットの下に使用済みの合鍵が隠されていた"]
+    },
+    { id:"jk1", loc:"jitaku_kayo", title:"妻・佳代への第一声", sub:"「事務所に、少し用事がある」",
+      body:[
+        "佳代：「主人は昨夜、『事務所に、少し用事がある』と言って出かけていました。帰ってきたのは覚えていません。物音も、まったく聞こえませんでした。」"
+      ],
+      evidence:["佳代：武藤は事件当夜『事務所に用事がある』と言って外出していたと証言"]
+    },
+    { id:"jk2", loc:"jitaku_kayo", title:"佳代への追及：「時効のはずだ」", sub:"武藤の怯え",
+      body:[
+        "佳代：「ここ最近、主人は何かに怯えているような素振りを、時々見せていました。夜中に急に電話をかけに、外に出て行ったりして。一度だけ、『あの件は、もう時効のはずだ』と、誰かに向かって強い口調で言っているのを、耳にしたことがあります。」",
+        "「詳しくは話してくれませんでしたが……刑事だった頃の、昔の仕事の話じゃないかと思います。」"
+      ],
+      evidence:["佳代：武藤が『あの件は、もう時効のはずだ』と電話で話しているのを聞いたと証言"]
+    },
+    { id:"jk3", loc:"jitaku_kayo", title:"佳代の複雑な心境", sub:"「少しだけ、ほっとしている」",
+      body:[
+        "佳代：「悲しいです、もちろん。……ただ、正直に言うと、少しだけ、ほっとしている自分もいます。主人は、家族にも、ずっと何かを隠し続けているような人でしたから。」",
+        "資産の大部分は佳代に相続される予定だという。佳代：「お金のために、ということでしたら、私にも動機はあることになりますね。でも、私は、あの人を殺していません。」"
+      ],
+      evidence:["佳代：夫の死に複雑な心境を認め、資産の大部分が自分に相続されると証言"]
+    },
+    { id:"jm1", loc:"jimusho", title:"応接室の血痕", sub:"清掃された跡",
+      body:[
+        "武藤が顧問として使っていた応接室のデスク周辺に、微かな血痕。ルミノール反応では、かなりの量の出血があったと推測される。清掃を試みた形跡があるが、素人の作業らしく、完全には消しきれていない。",
+        "椅子が一脚倒れたまま、棚の書類が床に散らばっている。"
+      ],
+      evidence:["応接室に、清掃しきれなかった血痕と争いの跡が残っていた"]
+    },
+    { id:"jm2", loc:"jimusho", title:"消えた表彰の盾", sub:"凶器の可能性",
+      body:[
+        "棚に飾られていたはずの、重量のある表彰の盾が一つ、見当たらない。武藤自身が、警備業界の功労で受け取ったものだという。"
+      ],
+      evidence:["武藤の表彰の盾が、事務所から持ち去られていた（凶器の可能性）"]
+    },
+    { id:"jm3", loc:"jimusho", title:"夜間の入退室記録", sub:"「知人」とだけ",
+      body:[
+        "事件当夜、武藤本人が21時頃に入館。その後22時頃、もう一人の来訪者の記録があるが、IDカードではなく、社長・沢渡自身による手動記録で、来客名の欄には「知人」とだけ書かれていた。"
+      ],
+      evidence:["22時頃、名前を伏せた『知人』が事務所を訪れた記録があった"]
+    },
+    { id:"jm4", loc:"jimusho", title:"社長・沢渡への聞き込み", sub:"「名前は伏せておいてくれ」",
+      body:[
+        "沢渡：「あの夜、たまたま忘れ物を取りに立ち寄ったんです。武藤さんが、応接室で誰かと深刻な雰囲気で話しているのが聞こえました。邪魔をしないよう、すぐに出ました。」",
+        "「来客記録の『知人』というのは、武藤さんに『名前は伏せておいてくれ』と頼まれたんです。深く考えず、そのまま従ってしまいました。」"
+      ],
+      evidence:["沢渡：武藤に頼まれ、来訪者の名前を記録上伏せていたと証言"]
+    },
+    { id:"kk1", loc:"kikitori", title:"神崎（遺族）への聞き込み", sub:"「天罰が下った」",
+      body:[
+        "神崎：「武藤……あの男の名前は、一生忘れません。息子を、あんな形で見殺しにされたんですから。」当夜は家に一人でいたとのことで、証明できる人間はいないという。",
+        "「正直に言えば……天罰が下ったのだと思います。私が手を下したわけではありませんが。」"
+      ],
+      evidence:["神崎：息子を武藤に見殺しにされたと証言。当夜のアリバイはない"]
+    },
+    { id:"kk2", loc:"kikitori", title:"米倉（元同僚・現役警察官）への聞き込み", sub:"「立場上、話せません」",
+      body:[
+        "米倉：「武藤とは、長い付き合いでした。あの事件について、詳しくお話しすることは、立場上できません。」もみ消しについて尋ねると、視線を逸らしながら「当時、上からの圧力があったことは事実です」とだけ認めた。",
+        "当夜は当直だったとの証言があり、記録上のアリバイはひとまず確認できた。"
+      ],
+      evidence:["米倉：もみ消しへの上からの圧力を認めたが、詳細は語らなかった"]
+    },
+    { id:"kk3", loc:"kikitori", title:"黒田（元受刑者）への聞き込み", sub:"「線香の一つも上げてやる義理はない」",
+      body:[
+        "黒田：「武藤のせいで、俺は何年も、無実の罪で刑務所にいたんだ。今更、線香の一つも上げてやる義理はない。」当夜は、保護観察官との定期面談があり、ずっとそこにいたと証言。"
+      ],
+      evidence:["黒田：武藤への強い敵意を認めたが、当夜は保護観察面談があったと証言"]
+    },
+    { id:"kk4", loc:"kikitori", title:"三雲（フリージャーナリスト）への聞き込み", sub:"独自取材",
+      body:[
+        "三雲：「武藤さんの事件、独自に取材を続けていました。最近の天秤会関連の報道を受けて、この件も繋がりがあるんじゃないかと、調べ直していたところです。」",
+        "事件当夜、事務所付近にいたことを認める。「取材のため、近くで張り込んでいました。ただ、事務所の中までは入っていません。」"
+      ],
+      evidence:["三雲：天秤会関連の取材で武藤の事件を調べ直しており、当夜は事務所付近で張り込んでいたと証言"]
+    },
+    { id:"kk5", loc:"kikitori", title:"芝崎（後輩刑事）への聞き込み", sub:"「後悔しています」",
+      body:[
+        "芝崎：「当時、武藤さんの下で、あの事件を担当していました。正直、若かった自分には、上の判断に逆らう勇気がありませんでした。……ずっと、後悔しています。」当夜は署内での夜勤記録があり、確認が取れた。"
+      ],
+      evidence:["芝崎：もみ消し当時の担当者で、深く後悔していると証言"]
+    },
+    { id:"kk6", loc:"kikitori", title:"神崎・三雲、アリバイの薄さ", sub:"整理",
+      body:[
+        "水無瀬：「神崎さんと三雲さんは、アリバイがはっきりしません。米倉さんと芝崎さんは、記録上のアリバイがあります。黒田さんも、保護観察の記録があるので、裏を取れば白黒つくと思います。」"
+      ],
+      evidence:["神崎と三雲のアリバイは、この時点で裏付けが取れていなかった"]
+    },
+    { id:"kk7", loc:"kikitori", title:"米倉のアリバイ照会", sub:"当直記録",
+      body:[
+        "警察署に正式に照会すると、米倉は確かに当夜、当直に入っていた。ただし、当直中の外出記録までは細かく残っておらず、深夜帯の目撃証言も手薄だという。"
+      ],
+      evidence:["米倉の当直記録は確認できたが、深夜帯の外出の可能性は完全には否定できなかった"]
+    },
+    { id:"kk8", loc:"kikitori", title:"芝崎の夜勤記録：外部との連絡", sub:"1時間の空白",
+      advancesTimeOnOpen: true,
+      body:[
+        "同様に夜勤記録を確認すると、芝崎が一時間ほど「外部との連絡のため」と署を離れていた記録が残っていた。連絡先の詳細までは記録されていない。",
+        "一通りの聞き込みを終え、気づけば日が傾き始めていた。"
+      ],
+      evidence:["芝崎は当夜、1時間ほど『外部との連絡』を理由に署を離れていた記録があった"]
+    },
+    { id:"al1", loc:"alibi", title:"黒田のアリバイ確認", sub:"面談終了は21時半",
+      body:[
+        "保護観察官：「あの夜は、定期面談で黒田さんとお会いしています。時間は20時から21時半頃まで。面談後の足取りまでは、把握しておりません。」",
+        "面談終了時刻を考えると、事務所での『知人』の来訪（22時頃）には、ぎりぎり間に合う可能性が残る。"
+      ],
+      evidence:["黒田の保護観察面談は21時半終了で、事務所への来訪に間に合う可能性が残った"]
+    },
+    { id:"al2", loc:"alibi", title:"米倉のアリバイ再確認", sub:"深夜帯の空白",
+      body:[
+        "署内記録担当：「確かに、米倉はあの夜、当直に入っています。ただ、当直中の外出記録までは、細かくは残っていません。」記録上はアリバイがあるように見えるが、短時間の空白は否定できない。"
+      ],
+      evidence:["米倉の当直記録には、短時間の外出の可能性が残る空白があった"]
+    },
+    { id:"al3", loc:"alibi", title:"芝崎のアリバイ再確認", sub:"「外部との連絡」の中身",
+      body:[
+        "署内記録担当：「芝崎も、当直記録があります。ただ、あの夜、1時間ほど『外部との連絡のため』と、署を離れていた記録が残っていますね。」連絡先の詳細は記録されていない。"
+      ],
+      evidence:["芝崎の『外部との連絡』の詳細は、記録上確認できなかった"]
+    },
+    { id:"sb1", loc:"shibasaki2", title:"芝崎への追及：武藤からの呼び出し", sub:"「話がしたい」",
+      body:[
+        "芝崎：「武藤さんから、電話がありました。あの日の夜、署にいる自分に直接、『話がしたい、事務所に来てくれないか』と。20分ほど署を抜けて、事務所に向かいました。」"
+      ],
+      evidence:["芝崎：武藤本人からの呼び出しで、事件当夜事務所を訪れていたと証言"]
+    },
+    { id:"sb2", loc:"shibasaki2", title:"芝崎への追及：武藤自身への脅迫", sub:"「天秤がどうとか」",
+      body:[
+        "芝崎：「武藤さんは、思い詰めた様子で、『最近、昔の事件のことで、脅されている』と言っていました。『天秤がどうとか、そんな話をする人物から、接触があった』というようなことを、仄めかしていました。」",
+        "「僕は21時40分頃には、事務所を出たと思います。その時、武藤さんは、まだ生きていらっしゃいました。」"
+      ],
+      evidence:["芝崎：武藤自身が『天秤』を名乗る何者かから接触・脅迫を受けていたと証言","芝崎は21時40分頃に退出しており、その時点で武藤は生存していた"]
+    },
+    { id:"yk1", loc:"yakan", title:"近隣住民の証言", sub:"言い争う声",
+      body:[
+        "住民：「あの夜、事務所の方から、言い争うような声が、少しだけ聞こえた気がします。時間は22時過ぎくらい。一人は、年配の男性の声だったような。」"
+      ],
+      evidence:["近隣住民：22時過ぎ、事務所から言い争う声（年配の男性含む）が聞こえたと証言"]
+    },
+    { id:"yk2", loc:"yakan", title:"夜間防犯カメラの記録", sub:"22時5分の侵入",
+      body:[
+        "裏口付近のカメラに、22時5分頃、中肉中背、暗い色の上着を着た一人の人物が入っていく様子が映っている。映像は不鮮明で、性別の判別は難しい。"
+      ],
+      evidence:["22時5分頃、裏口から人物が事務所に侵入する様子がカメラに記録されていた"]
+    },
+    { id:"yk3", loc:"yakan", title:"退出時の映像：大きな荷物", sub:"凶器の可能性",
+      body:[
+        "22時50分頃、同じ裏口から、その人物が大きな荷物を抱えて出てくる様子が記録されている。大きさから、消えていた表彰の盾である可能性が高い。",
+        "石森：「22時5分に入って、22時50分に出て行く……45分ほどの滞在時間です。争って、遺体を運ぶ準備をして、というには忙しない時間かもしれませんが、不可能ではなさそうです。」"
+      ],
+      evidence:["22時50分頃、侵入者が大きな荷物（表彰の盾と推測される）を抱えて退出していた"]
+    },
+    { id:"kz1", loc:"saitsuikyu", title:"神崎への再追及：窓越しの目撃", sub:"「中には入っていません」",
+      body:[
+        "神崎：「その時間、確かに事務所の近くにはいました。武藤の顔を、一目見てやりたいと思って。……いいえ、中には入っていません。窓の外から、中の様子を窺っただけです。武藤が、誰かと言い争っているのが見えました。」",
+        "「その『誰か』が誰なのかまでは、分かりませんでした。」"
+      ],
+      evidence:["神崎：窓越しに、武藤が誰かと言い争っているのを目撃したが、中には入っていないと証言"]
+    },
+    { id:"kz2", loc:"saitsuikyu", title:"神崎の告白：ブローチとメモの偽装", sub:"「浅はかな考えでした」",
+      body:[
+        "神崎：「その後、武藤が一人になった隙に、窓越しに、あのブローチとメモを、投げ入れました。桐原法律事務所の事件、ニュースで見ました。天秤会の仕業に見せかければ、警察の目も私には向かないだろうと。浅はかな考えでした。」",
+        "「私は、武藤に手を下していません。誰が手を下したのかは、本当に知りません。」"
+      ],
+      evidence:["神崎：桐原事件の報道に影響され、天秤会を模したブローチとメモを自ら投げ入れたと告白"]
+    },
+    { id:"mk1", loc:"saitsuikyu", title:"三雲への再追及：目撃した侵入", sub:"「横顔だけ」",
+      body:[
+        "三雲：「あの夜、22時前後も、確かに張り込みを続けていました。事務所の中に、誰かが侵入する様子を、遠くから見ていました。暗くてはっきりとは……ただ、裏口から出てくる時、一瞬、月明かりで横顔だけ見えました。」"
+      ],
+      evidence:["三雲：22時前後、事務所へ侵入する人物の横顔を、遠目に目撃したと証言"]
+    },
+    { id:"mk2", loc:"saitsuikyu", title:"決定的な証拠：望遠レンズの写真", sub:"記者としての性分",
+      body:[
+        "三雲：「申し訳ありません、記者としての性分で、証拠になりそうなものは、きちんと確認したくて。望遠レンズで、写真を一枚だけ撮っています。」",
+        "液晶に、粗い画質ながら、裏口から出てくる人物の横顔が映っている。水無瀬：「……この横顔、見覚えがあります。」――これまで話を聞いてきた関係者の一人と、一致する特徴を持っていた。"
+      ],
+      evidence:["三雲が撮影した写真に、事務所から出てくる人物の横顔が写っており、関係者の一人と特徴が一致した"]
+    },
+  ],
+
+  closingVerdict: {
+    title: "写真は撮れた —— だが、まだ名前は分からない",
+    sub: "決定的な手がかりを手にした。真犯人の特定は、後編へ持ち越される。"
+  },
+  epilogue: {
+    intro: "自宅と事務所、二つの現場。神崎による偽装工作、そして、武藤自身が受けていたという本物の脅迫――事件は、幾重にも入り組んだ形を見せている。三雲が撮影した一枚の写真だけが、真犯人の姿を、かすかに捉えていた。",
+    characters: [
+      { who:"助手・石森隆一", text:"「神崎さんの告白で、ブローチとメモの謎は解けました。でも、本当に武藤さんに手を下した人物は、まだ別にいます」と、表情を引き締めた。" },
+      { who:"助手・水無瀬綾", text:"「武藤さん自身が、本物の天秤会から接触を受けていた……。桐原先生の事件と、地続きなのかもしれません」と、静かに呟いた。" },
+    ],
+    outro: "写真の人物が誰なのか、これまでの証言と照らし合わせれば、答えは近い。だが、それを確かめるのは、翌朝になってからだ。《前編・完》"
+  },
+};
+
+const nazotan2_ep2b = {
+  id: "itsuwari-no-tenbin-go",
+  chapter: 3,
+  cover: "ntt2.jpg",
+  number: 4,
+  fileLabel: "なぞたん2 ―― 第二話〈後編〉",
+  title: "偽りの天秤 —— 元刑事・武藤殺人事件〈後編〉",
+  subtitle: "武藤邸・警備会社事務所〈なぞたん2・第二話 後編〉",
+  teaser: "共犯者説は、最後まで筋が通らなかった。だが、たった一つの視点が変わった瞬間、すべてが一本の線に繋がった。",
+  status: "locked",
+  requiresUnlock: true,
+
+  prologueLede: "翌朝。東雲先生、石森、水無瀬は、三雲が撮影した一枚の写真――事務所の裏口から出てくる人物の横顔――を、もう一度、慎重に見つめ直す。事件は、共犯者がいるようにしか見えない、奇妙な形をしていた。",
+  prologueParagraphs: [
+    "だが、時間をかけて事実を積み上げていくと、その「奇妙さ」は、たった一つの見方が変わるだけで、綺麗に解けていく。武藤は、誰の目にも触れない45分間で、一人の人間によって、すべてを終えられていた。",
+    "先生、慎重に、しかし着実に、最後の一歩を進めよう。"
+  ],
+  cast: [
+    { id:"shibasaki", role:"後輩刑事（当時の担当・現役）", name:"芝崎 悠人" },
+    { id:"kanzaki", role:"遺族", name:"神崎 忠雄" },
+    { id:"yonekura", role:"元同僚・現役警察官", name:"米倉 誠" },
+    { id:"sawatari", role:"警備会社社長", name:"沢渡 隆" },
+    { id:"kuroda", role:"元受刑者", name:"黒田 亮" },
+  ],
+
+  locations: [
+    { id:"shashin",   label:"写真の照合", timeSlot:0 },
+    { id:"kakunin",   label:"沢渡・芝崎への再確認", timeSlot:0, unlockAfter:"sh1" },
+    { id:"kuruma",    label:"芝崎の自家用車", timeSlot:1, unlockAfter:"kk3" },
+    { id:"buto_kankei", label:"芝崎と武藤家の関係", timeSlot:1, unlockAfter:"kr3" },
+    { id:"ketsudan",  label:"確信、そして対決へ", timeSlot:2, unlockAfter:"bk3" },
+  ],
+
+  investigationBudget: 24,
+  unlockThreshold: 21,
+
+  clues: [
+    { id:"sh1", loc:"shashin", title:"写真照合の依頼", sub:"専門家へ",
+      body:[
+        "三雲から提供を受けた写真を、専門の鑑定士に依頼。「不鮮明な写真ですので、断定的なことは申し上げられませんが、複数名を除外することはできそうです」との回答。結果は、時間をかけて精査される。"
+      ],
+      evidence:["三雲が撮影した写真の鑑定を、専門家に正式に依頼した"]
+    },
+    { id:"kk1", loc:"kakunin", title:"沢渡への再確認：話し声の訂正", sub:"「電話だったかもしれません」",
+      body:[
+        "沢渡：「あの夜聞こえた話し声、そう言われると自信がなくなってきました。武藤さんの声しか、はっきりとは覚えていないかもしれません。相槌のような小さな音は聞こえた気がしますが……もしかしたら、電話の相手だったのかもしれませんね。当時は、来客だとばかり思い込んでいました。」"
+      ],
+      evidence:["沢渡：22時頃に聞いた『話し声』は、電話の可能性があると証言を訂正した"]
+    },
+    { id:"kk2", loc:"kakunin", title:"芝崎への再確認：25分間の空白", sub:"「証明できるものは、ありません」",
+      body:[
+        "芝崎：「署に戻る途中、少し遠回りをして、頭を冷やしていました。武藤さんの話が、ショックだったので。」遠回りの経路を尋ねると、視線を逸らしながら「特に決まった道は。ただ、歩き回っていただけです。証明できるものは、正直、ありません」と答えた。"
+      ],
+      evidence:["芝崎：21時40分〜22時5分の行動を証明するものが何もないと証言"]
+    },
+    { id:"kk3", loc:"kakunin", title:"武藤の携帯電話：通信記録", sub:"非通知の通話",
+      body:[
+        "通信会社への正式な照会により、21時55分から22時8分頃まで、非通知の番号との通話記録が判明。桐原の事件と同じパターン――『天秤』を名乗る何者かとの通話だったと推測される。",
+        "沢渡が聞いた『話し声』は、この電話の声だった可能性が極めて高い。つまり、22時頃、事務所の応接室には、電話中の武藤以外、誰もいなかったことになる。"
+      ],
+      evidence:["武藤は22時前後、非通知の電話（天秤会と思われる相手）と通話していた"]
+    },
+    { id:"ku1", loc:"kuruma", title:"芝崎の自家用車：所在確認", sub:"署の駐車場",
+      body:[
+        "米倉の協力を得て署の駐車場を確認すると、芝崎の車が停まっているのが見つかる。任意での確認という形で、慎重に許可を取り、車内を調べさせてもらう。"
+      ],
+      evidence:["芝崎の自家用車は、署の駐車場に停まっていた"]
+    },
+    { id:"ku2", loc:"kuruma", title:"トランク内の検分", sub:"微かな血痕反応",
+      body:[
+        "トランク内は一見綺麗に片付けられているが、内張りの継ぎ目に、微かな血痕の反応がルミノール検査で確認される。"
+      ],
+      evidence:["芝崎の車のトランクから、微量の血痕反応が検出された"]
+    },
+    { id:"ku3", loc:"kuruma", title:"座席の泥と消毒液の匂い", sub:"清掃・偽装の形跡",
+      body:[
+        "座席の足元に、乾いて付着した泥のような跡。後部座席には、消毒液のような不自然に強い匂いが残っており、清掃した形跡が見られる。"
+      ],
+      evidence:["座席に泥の付着と、清掃を試みたような消毒液の匂いが残っていた"]
+    },
+    { id:"kr1", loc:"buto_kankei", title:"近隣住民の証言", sub:"「若い刑事さんが、よく出入りしていた」",
+      body:[
+        "近隣住民：「数年前、まだ武藤さんが現役の頃、若い刑事さんが、よくお宅に出入りしているのを見かけましたよ。何度か、家の中にも入られていたと思います。今思えば、芝崎さんに似ていたかもしれません。」"
+      ],
+      evidence:["近隣住民：数年前、若い刑事（芝崎と思われる）が武藤家に頻繁に出入りしていたと証言"]
+    },
+    { id:"kr2", loc:"buto_kankei", title:"佳代への確認：合鍵の経緯", sub:"「部下に、それとなく話していた」",
+      body:[
+        "佳代：「芝崎さん……ああ、はい。主人がまだ現役の頃、何度か家にいらしたことがあります。あの人、真面目な方で、主人も可愛がっていました。」",
+        "「合鍵の場所を具体的に教えたかは、はっきり覚えていませんが……昔、主人が『何かあった時のために』と、家族や親しい部下に、それとなく話していたのを聞いたことがある気がします。」"
+      ],
+      evidence:["佳代：武藤が親しい部下に合鍵の存在をそれとなく話していたことがあると証言"]
+    },
+    { id:"kr3", loc:"buto_kankei", title:"整理：機会・動機・物証", sub:"三つが揃う",
+      body:[
+        "石森：「芝崎さんは、過去に武藤さんの部下として、家に出入りしていた。その頃に、合鍵の存在や、家の構造を知る機会があった、ということですね。」",
+        "水無瀬：「機会、動機、物証……全部、揃ってきました。」"
+      ],
+      evidence:["芝崎には、動機・機会・物証のすべてが揃いつつあった"]
+    },
+    { id:"bk1", loc:"ketsudan", title:"疑問：一人でできるのか", sub:"忙しない45分間",
+      body:[
+        "石森：「21時40分、芝崎さんが退出。21時55分から22時8分、武藤さんは電話中。22時5分、裏口から侵入。22時50分、荷物を持って退出。……この流れ、確かに、一人でやるには忙しないように見えます。」"
+      ],
+      evidence:["45分間ですべてを一人でやり遂げられるのか、という疑問が残っていた"]
+    },
+    { id:"bk2", loc:"ketsudan", title:"専門性という視点", sub:"「共犯者なんて、最初から必要なかった」",
+      body:[
+        "水無瀬：「でも、これ、ただの人間がやるなら忙しないと思います。でも……芝崎さんは、元刑事の下で、現場の扱いを叩き込まれた、現役の警察官です。」",
+        "石森：「遺体の運搬も、凶器の持ち去りも、偽装工作も――全部、『犯人がどう動けば捜査を欺けるか』を、誰よりも知っている人間だからこそ、一人で、45分でやり遂げられた。21時40分に一度『退出』を装ったのも、あらかじめ、そういう動きを想定していたからです。」"
+      ],
+      evidence:["芝崎の警察官としての専門知識があれば、単独犯行は十分に可能だと判明した"]
+    },
+    { id:"bk3", loc:"ketsudan", title:"写真照合の結果", sub:"「芝崎氏について、一致度が最も高い」",
+      autoReveal:true, timeSlot:2,
+      body:[
+        "鑑定士（報告書）：「神崎氏、米倉氏、沢渡氏、黒田氏、三雲氏は、いずれも一致度が低く、除外可能と判断します。残る候補者のうち、芝崎氏について、一致度が最も高いという結果が出ました。ただし、画質の問題上、100%の断定はできません。」"
+      ],
+      evidence:["写真鑑定の結果、芝崎の一致度が最も高いと判明した"]
+    },
+  ],
+
+  questions: {
+    q2: [
+      { id:"a", label:"22時5分、武藤が電話に気を取られている隙に裏口から単独で侵入し、殺害後、遺体と凶器を自宅へ運んで偽装工作を行った" },
+      { id:"b", label:"神崎が実行犯で、芝崎は事後の偽装のみを手伝った" },
+      { id:"c", label:"沢渡が、経営トラブルを理由に手を下した" },
+      { id:"d", label:"米倉が、もみ消しの発覚を恐れて手を下した" },
+    ],
+    q3: [
+      { id:"a", label:"当時のもみ消しへの後悔と、武藤自身への複雑な感情が積み重なった末の犯行" },
+      { id:"b", label:"金銭的なトラブル" },
+      { id:"c", label:"警察内部の出世争い" },
+      { id:"d", label:"個人的な怨恨のみによる衝動的な犯行" },
+    ],
+  },
+  correct: { q1:["shibasaki"], q2:"a", q3:"a" },
+
+  confrontation: {
+    culpritName: "芝崎",
+    intro: "署の面談室、東雲先生は、芝崎とまっすぐに向き合った。「芝崎さん。武藤さんを殺害したのは、あなたですね。」芝崎は、しばらく先生を見つめ返していたが、やがて、静かに視線を落とした。",
+    rounds: [
+      {
+        statements: [
+          { speaker:"芝崎", text:"「20分ほど署を抜けて、事務所に向かいました。」", isLie:false },
+          { speaker:"芝崎", text:"「その後は、二度と事務所には近づいていません。」", isLie:true },
+          { speaker:"芝崎", text:"「武藤さんは、僕が最初に訪ねた時、まだ生きていらっしゃいました。」", isLie:false },
+        ],
+        rebuttal: "「その後は、二度と事務所には近づいていません。何度も申し上げている通りです。」",
+        hit: "芝崎の表情が、初めてはっきりと強張る。「……その記録が、本物だとおっしゃるんですね。」",
+        options: [
+          { id:"c1", label:"事務所裏口の防犯カメラ――22時5分、何者かが侵入する映像", correct:true },
+          { id:"c2", label:"沢渡さんが、話し声を『電話だったかもしれない』と証言を訂正したこと", correct:false },
+          { id:"c3", label:"米倉さんの当直記録に、深夜帯の空白があったこと", correct:false },
+          { id:"c4", label:"黒田さんの保護観察面談が、21時半に終了していたこと", correct:false },
+        ],
+      },
+      {
+        rebuttal: "「……その記録が、本物だとおっしゃるんですね。ですが、それだけでは、私が中にいたという証明にはなりません。」",
+        hit: "芝崎は、深く俯く。もう、言い逃れる材料は、多くは残っていないようだった。",
+        options: [
+          { id:"c5", label:"あなたの自家用車のトランクから検出された、微量の血痕反応", correct:true },
+          { id:"c6", label:"武藤さんが、22時前後に非通知の電話を受けていた記録", correct:false },
+          { id:"c7", label:"事務所から、表彰の盾が持ち去られていたという事実", correct:false },
+        ],
+      },
+      {
+        statements: [
+          { speaker:"芝崎", text:"「武藤さんの家に、行ったことはあります。」", isLie:false },
+          { speaker:"芝崎", text:"「合鍵の場所なんて、知りませんでした。」", isLie:true },
+          { speaker:"芝崎", text:"「あの人には、お世話になりました。」", isLie:false },
+        ],
+        rebuttal: "「合鍵の場所なんて、知りませんでした。本当に、偶然のようなものです。」",
+        hit: "芝崎の声から、力が抜けていく。もう、抵抗する意志は、ほとんど残っていないようだった。",
+        options: [
+          { id:"c8", label:"近隣住民と佳代さんの証言――武藤さんが、親しい部下に合鍵の存在をそれとなく話していたこと", correct:true },
+          { id:"c9", label:"写真鑑定で、芝崎さんの一致度が最も高かったという結果", correct:false },
+          { id:"c10", label:"座席に残っていた、清掃を試みたような消毒液の匂い", correct:false },
+        ],
+      },
+    ],
+    finalConfession: [
+      "芝崎は、長い沈黙の後、静かに語り始めた。「……はい。私が、武藤さんを手にかけました。」",
+      "「あの夜、武藤さんに呼び出されて、事務所へ向かいました。『昔の事件のことで、脅されている』と、思い詰めた様子で話す先輩を見て……正直、複雑な気持ちになりました。あの人を庇うべきなのか、それとも、ようやく報いが来たと思うべきなのか。」",
+      "「一度は、何も言えないまま、事務所を出ました。でも、頭の中で、ずっと同じ言葉が渦巻いていたんです。『あの人のせいで、俺は、ずっと自分を偽り続けてきた』と。……気づいたら、引き返していました。」",
+      "「電話中の武藤さんの隙をついて、応接室に入りました。……気づいた時には、もう、取り返しのつかないことになっていました。凶器を持ち去り、遺体を自宅まで運んだのは、せめて、家族の前で、静かに送ってあげたいと思ったからです。……身勝手な理由だと、分かっています。」",
+      "水無瀬が、震える声で尋ねる。「桐原先生の事件のことを、真似たんですか。」芝崎は、力なく頷いた。「はい。あのニュースを見て、天秤会のせいにできればと。……でも、こんな形で、暴かれるとは思いませんでした。」",
+    ],
+    gameOverText: "芝崎は静かに首を振ると、それ以上何も語らなかった。「証拠が、まだ足りないのではありませんか」とだけ言い残す。決定的な言葉を引き出せないまま、この対決は失敗に終わった——。",
+  },
+
+  solutionSections: [
+    { title:"第一部　二つの現場、一人の犯人",
+      html:"発見現場(自宅)と実行現場(事務所)――一見、複数の人間が関与したかのように見えた事件は、22時前後の通話記録によって、単純な構図へと収束していった。沢渡が聞いた『話し声』は、天秤会と思われる相手との電話だった。" },
+    { title:"第二部　専門性という凶器",
+      html:"元刑事の後輩である芝崎は、現場の偽装、遺体の運搬、凶器の処理――すべてを、警察官としての専門知識で、たった45分の間にやり遂げていた。共犯者は、最初から必要なかった。" },
+    { title:"第三部　過去からの糸",
+      html:"芝崎は、かつて武藤の部下として、家に出入りしていた過去を持つ。合鍵の存在を知る機会も、そこにあった。車のトランクの血痕、写真鑑定の結果――物証のすべてが、一人の人物を指し示していた。" },
+    { title:"第四部　もう一つの模倣",
+      html:"神崎による天秤会を模した偽装工作は、桐原の事件報道に影響されたものだった。だが、芝崎自身もまた、同じ報道からヒントを得て、罪を組織のせいにしようとしていた。<strong>天秤会という存在が、社会に落とし始めた影響の大きさを、この事件は示していた。</strong>" },
+  ],
+  evidenceTable: [
+    ["1","武藤の通信記録（22時前後の非通知電話）","沢渡の証言の訂正、応接室に武藤一人だったことの裏付け"],
+    ["2","防犯カメラ映像（22時5分の侵入）","芝崎の証言の矛盾の発覚"],
+    ["3","芝崎の車のトランクの血痕反応","遺体運搬の物的証拠"],
+    ["4","近隣住民・佳代の証言（合鍵を知り得た経緯）","芝崎の機会の裏付け"],
+    ["5","写真鑑定の結果","芝崎が最も一致度の高い人物であることの裏付け"],
+  ],
+  epilogue: {
+    intro: "芝崎の身柄が確保され、「偽りの天秤」と呼ぶべきこの事件は、その全貌を明らかにした。天秤会そのものは、今回、実行犯としては姿を見せなかった。だが、その存在が落とす影は、すでに、こんな形で社会に染み出し始めていた。",
+    characters: [
+      { who:"遺族・神崎", text:"偽装工作については、正式に罪を認めた。「浅はかな考えでした」と、深く頭を下げた。" },
+      { who:"武藤の妻・佳代", text:"「主人にも、罪はありました。でも、それを裁くのは、法律であるべきだったと思います」と、静かに語った。" },
+      { who:"助手・石森隆一", text:"「天秤会は、直接手を下していません。でも、この事件を生む土壌を作ったのは、間違いなく、あの組織です」と、険しい表情を見せた。" },
+      { who:"助手・水無瀬綾", text:"「武藤さん自身も、本物の天秤会から接触を受けていました。あの脅迫の続きは、まだ終わっていません」と、気を引き締めた。" },
+    ],
+    outro: "偽りの天秤は、崩れ落ちた。だが、本物の天秤――佐伯と、その先にいる何者かは、まだ、闇の中にいる。《第二話・完》"
+  },
+  redHerrings: [
+    "神崎による偽装工作：桐原事件を模したものだったが、殺害そのものへの関与はなかった。",
+    "米倉・沢渡・黒田への疑い：それぞれ動機や状況証拠はあったが、実行への直接関与は認められなかった。",
+    "武藤自身が受けていた本物の脅迫：事件の背景として重要だが、今回の実行犯とは無関係だった。",
+  ]
+};
+
+const episodes = [ episode1, episode2, episode3, episode4, episode5, episode6, episode7, episode8, episode9, episode10, episode11, episode12, episode13, gaiden1, gaiden2, gaiden3, nazotan2_ep1a, nazotan2_ep1b, nazotan2_ep2a, nazotan2_ep2b ];
 
 
 
@@ -5927,7 +6448,7 @@ let clearedEpisodes = new Set();
 let hintLevel = "standard"; // "standard" | "hard"
 let cluesUsed = 0;
 let confrontRound = 0;
-let confrontStage = "question"; // "question" | "hit" | "gameover" | "confession"
+let confrontStage = "question"; // "debate" | "question" | "hit" | "gameover" | "confession"
 let confrontLog = [];
 let decisionChoices = {}; // clueId -> chosen choice index (for resolved decision clues)
 let investigationFlags = {}; // arbitrary story flags set by decision choices
@@ -6730,7 +7251,7 @@ function submitDeduction(){
     // is confronted, but the ringleader gets away. Revealed only here.
     usingPartialConfrontation = true;
     confrontRound = 0;
-    confrontStage = "question";
+    confrontStage = roundStartStage(ep.partialConfrontation, 0);
     confrontLog = [];
     goPhase(3);
     return;
@@ -6740,7 +7261,7 @@ function submitDeduction(){
     // Correct deduction unlocks the face-to-face confrontation challenge.
     usingPartialConfrontation = false;
     confrontRound = 0;
-    confrontStage = "question";
+    confrontStage = roundStartStage(ep.confrontation, 0);
     confrontLog = [];
     goPhase(3);
     return;
@@ -6783,9 +7304,15 @@ function renderEscapeEnding(ep){
    retry available). Right pick through every round -> full confession.
    ======================================================================== */
 let shuffledConfrontOpts = [];
+let shuffledDebateStatements = [];
 
 function getActiveConfrontation(ep){
   return usingPartialConfrontation ? ep.partialConfrontation : ep.confrontation;
+}
+
+function roundStartStage(conf, roundIdx){
+  const round = conf.rounds[roundIdx];
+  return (round && round.statements && round.statements.length) ? "debate" : "question";
 }
 
 function renderConfrontation(){
@@ -6831,6 +7358,28 @@ function renderConfrontation(){
 
   const round = conf.rounds[confrontRound];
 
+  if(confrontStage === "debate"){
+    if(confrontRound===0 && confrontLog.length===0){
+      wrap.innerHTML = `<div class="confront-intro"><p class="confront-setup">${conf.intro}</p></div>`;
+    } else {
+      wrap.innerHTML = `<div class="confront-intro">${logHtml}</div>`;
+    }
+    shuffledDebateStatements = shuffleArr(round.statements.map((s,i)=>({...s, _origIndex:i})));
+    const bubblesHtml = shuffledDebateStatements.map((s,i)=>`
+      <div class="debate-bubble" data-idx="${i}" onclick="chooseStatement(${i})">
+        <span class="cb-name">${s.speaker}</span>${s.text}
+      </div>
+    `).join("");
+    wrap.innerHTML += `
+      <div class="confront-round">
+        <div class="confront-round-num">対決 ${confrontRound+1} / ${conf.rounds.length} — 動揺を突く</div>
+        <div class="confront-prompt">矛盾している発言を、見抜いてください。</div>
+        <div class="debate-statements" id="debateStatements">${bubblesHtml}</div>
+      </div>
+    `;
+    return;
+  }
+
   if(confrontStage === "hit"){
     wrap.innerHTML = `
       <div class="confront-intro">${logHtml}</div>
@@ -6868,6 +7417,27 @@ function renderConfrontation(){
   `;
 }
 
+function chooseStatement(i){
+  const stmt = shuffledDebateStatements[i];
+  const el = document.querySelector(`#debateStatements .debate-bubble[data-idx="${i}"]`);
+  if(stmt.isLie){
+    if(el) el.classList.add("shatter");
+    const flash = document.createElement("div");
+    flash.className = "weakpoint-flash";
+    flash.textContent = "WEAK POINT FOUND";
+    document.getElementById("confrontContent").appendChild(flash);
+    setTimeout(()=>{
+      confrontStage = "question";
+      renderConfrontation();
+    }, 420);
+  } else {
+    if(!el) return;
+    el.classList.remove("wrong-flash");
+    void el.offsetWidth; // restart animation if clicked repeatedly
+    el.classList.add("wrong-flash");
+  }
+}
+
 function chooseEvidence(i){
   const ep = currentEpisode;
   const conf = getActiveConfrontation(ep);
@@ -6891,14 +7461,16 @@ function advanceConfrontation(){
   if(confrontRound >= conf.rounds.length){
     confrontStage = "confession";
   } else {
-    confrontStage = "question";
+    confrontStage = roundStartStage(conf, confrontRound);
   }
   renderConfrontation();
 }
 
 function retryConfrontation(){
+  const ep = currentEpisode;
+  const conf = getActiveConfrontation(ep);
   confrontRound = 0;
-  confrontStage = "question";
+  confrontStage = roundStartStage(conf, 0);
   confrontLog = [];
   renderConfrontation();
 }
